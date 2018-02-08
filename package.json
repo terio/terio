@@ -1,0 +1,9 @@
+{
+  "name": "loki",
+  "version": "0.1.0",
+  "main": "index.js",
+  "repository": "git@github.com:subbu963/loki.git",
+  "author": "subramanyam963@gmail.com",
+  "license": "MIT",
+  "devDependencies": {}
+}
