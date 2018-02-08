@@ -5,5 +5,9 @@
   "repository": "git@github.com:subbu963/loki.git",
   "author": "subramanyam963@gmail.com",
   "license": "MIT",
-  "devDependencies": {}
+  "devDependencies": {
+    "babel-cli": "^6.26.0",
+    "babel-plugin-transform-react-jsx": "^6.24.1",
+    "babel-preset-env": "^1.6.1"
+  }
 }
