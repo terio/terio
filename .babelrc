@@ -1,8 +1,10 @@
 {
-  "presets": ["env"],
-  "plugins": [
-    ["transform-react-jsx", {
-        "pragma": "createElement"
-    }]
-  ]
+    "presets": [
+        [
+            "babel-preset-loki",
+            {
+                "pragma": "createElement"
+            }
+        ]
+    ]
 }

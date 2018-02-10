@@ -1,5 +1,5 @@
 import Component from './components/base'
-import createElement from './utils/create-element'
+import {createElement} from './vdom/element'
 export default {
     Component,
     createElement
