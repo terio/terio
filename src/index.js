@@ -1,6 +1,6 @@
 import Component from './components/base'
-import {createElement} from './vdom/element'
+import {create as createVirtualNode} from './vdom/node'
 export default {
     Component,
-    createElement
+    createVirtualNode
 };

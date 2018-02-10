@@ -3,7 +3,7 @@
         [
             "babel-preset-loki",
             {
-                "pragma": "createElement"
+                "pragma": "createVirtualNode"
             }
         ]
     ]
