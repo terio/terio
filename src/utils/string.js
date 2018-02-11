@@ -14,4 +14,4 @@ function toTitleCase(str) {
 export {
     toLowerCase,
     toTitleCase
-}
+};

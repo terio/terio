@@ -1,5 +1,5 @@
-import mount from './mount'
-import {create as createDOMNode} from './node'
+import mount from './mount';
+import {create as createDOMNode} from './node';
 
 export default {
     mount,

@@ -1,6 +1,5 @@
-import {isString, isFunction} from '../utils/type'
-import TYPE from '../constants/type';
-console.log(isFunction)
+import {isString, isFunction} from '../utils/type';
+
 function create(node) {
     if(isString(node)) {
         return document.createTextNode(node);
@@ -13,7 +12,7 @@ function create(node) {
     node.children
         .filter(child => child)
         .map(create)
-        .forEach(el.appendChild.bind(el))
+        .forEach(el.appendChild.bind(el));
     return el;
 }
 

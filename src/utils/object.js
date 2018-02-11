@@ -9,3 +9,6 @@ function shallowMerge(dest, ...srcs) {
     }
     return dest;
 }
+export {
+    shallowMerge
+};

@@ -1,4 +1,4 @@
-import TYPE from '../constants/type'
+import TYPE from '../constants/type';
 
 function getType(variable) {
     const type = typeof variable;
@@ -16,7 +16,6 @@ function isString(variable) {
     return getType(variable) === TYPE.string;
 }
 function isFunction(variable) {
-    console.log(getType(variable), TYPE.function)
     return getType(variable) === TYPE.function;
 }
 function isArray(variable) {
@@ -27,4 +26,4 @@ export {
     isString,
     isFunction,
     isArray
-}
+};
