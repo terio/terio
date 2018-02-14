@@ -1,4 +1,5 @@
 import EVENTS from './events';
+import {isArray} from '../utils/type';
 
 function getNativeProp(name, value) {
     if(name.startsWith('on') && EVENTS.has(name.substr(2))) {
@@ -10,6 +11,8 @@ function getNativeProp(name, value) {
     }
     if(name === 'style') {
         value = Object.entries(value).map(entry => entry.join(':')).join(';');
+    } else if(name === 'class' && isArray(value)) {
+        value = value.join(' ');
     }
     return {
         name,
