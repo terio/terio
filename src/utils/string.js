@@ -4,7 +4,7 @@ function toLowerCase(str) {
 function toUpperCase(str) {
     return String.prototype.toUpperCase.call(str);
 }
-function toTitleCase(str) {
+function upperFirst(str) {
     try {
         return toUpperCase(str[0]) + toLowerCase(str.substr(1));
     } catch(e) {
