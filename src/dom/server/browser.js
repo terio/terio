@@ -1,12 +1,13 @@
-import {setJSDOM, unsetJSDOM}, DOCUMENT from './document';
-import {setJSWindow, unsetJSWindow}, WINDOW from './window';
+import {setJSDOM, unsetJSDOM, default as DOCUMENT} from './document';
+import {setJSWindow, unsetJSWindow, default as WINDOW} from './window';
 
-function runInBrowserContextSync(func, dom = DOCUMENT, win = WINDOW, ...args) {
+function runInBrowserContext(func, dom = DOCUMENT, win = WINDOW, ...args) {
     setJSDOM(dom);
     setJSWindow(win);
-    func(...args);
+    const output = func(...args);
     unsetJSDOM();
     unsetJSWindow();
+    return output;
 }
 
 export {

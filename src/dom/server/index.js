@@ -1,5 +1,5 @@
-import {runInBrowserContextSync} from './browser';
-import {isString, isFunction} from '../utils/type';
+import {runInBrowserContext} from './browser';
+import {isString, isFunction} from '../../utils/type';
 import {getNativeProp} from '../client/props';
 import {VOID_ELEMENTS} from './element';
 
@@ -11,7 +11,7 @@ function reduceNodeToString(node) {
         const component = new node.type(node.props, node.children);
         return reduceNodeToString(component.render());
     }
-    let attrs = str = '';
+    let attrs = '', str = '';
     if(node.props) {
         attrs = Object.entries(node.props)
             .map(([name, value]) => {
@@ -22,9 +22,9 @@ function reduceNodeToString(node) {
             .join(' ');
     }
     if(VOID_ELEMENTS.has(node.type)) {
-        return `<${node.type} ${attrs}/>`;
+        return `<${node.type}${attrs ? ` ${attrs}` : ''}/>`;
     }
-    str += `<${node.type} ${attrs}>`;
+    str += `<${node.type}${attrs ? ` ${attrs}` : ''}>`;
     str = node.children
             .filter(child => child)
             .reduce((pv, cv) => {
@@ -34,7 +34,7 @@ function reduceNodeToString(node) {
 }
 
 function renderToString(node, dom, win) {
-    return runInBrowserContextSync(reduceNodeToString, dom, win, node);
+    return runInBrowserContext(reduceNodeToString, dom, win, node);
 }
 
 export {

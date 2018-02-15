@@ -13,5 +13,5 @@ function upperFirst(str) {
 }
 export {
     toLowerCase,
-    toTitleCase
+    upperFirst
 };

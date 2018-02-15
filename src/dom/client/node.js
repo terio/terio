@@ -1,4 +1,4 @@
-import {isString, isFunction} from '../utils/type';
+import {isString, isFunction} from '../../utils/type';
 import {getNativeProp} from './props';
 
 function create(node) {
@@ -14,7 +14,9 @@ function create(node) {
         for (const [name, value] of Object.entries(node.props)) {
             const prop = getNativeProp(name, value);
             if(!prop.isEvent) {
-                el.setAttribute(prop.name, prop.value);
+                if(isString(prop.value)) {
+                    el.setAttribute(prop.name, prop.value);
+                }
                 continue;
             }
             el.addEventListener(prop.name, prop.value);
