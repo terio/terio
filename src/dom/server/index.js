@@ -1,6 +1,6 @@
 import {runInBrowserContext} from './browser';
 import {isString, isFunction} from '../../utils/type';
-import {getNativeProp} from '../client/props';
+import {getNativeProp} from '../shared/props';
 import {VOID_ELEMENTS} from './element';
 
 function reduceNodeToString(node) {

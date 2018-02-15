@@ -1,4 +1,4 @@
-import EVENTS from './events';
+import EVENTS from '../shared/events';
 import {isArray} from '../../utils/type';
 
 function getNativeProp(name, value) {

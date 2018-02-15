@@ -1,5 +1,5 @@
 import {isString, isFunction} from '../../utils/type';
-import {getNativeProp} from './props';
+import {getNativeProp} from '../shared/props';
 
 function create(node) {
     if(isString(node)) {
