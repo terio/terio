@@ -17,7 +17,7 @@ function reduceNodeToString(node) {
             .map(([name, value]) => {
                 return getNativeProp(name, value);
             })
-            .filter(prop => !prop.isEvent)
+            .filter(prop => !prop.isEvent && isString(prop.value))
             .map(prop => `${prop.name}="${prop.value}"`)
             .join(' ');
     }
