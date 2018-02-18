@@ -11,4 +11,4 @@ export default DOCUMENT;
 export {
     setJSDOM,
     unsetJSDOM
-}
+};

@@ -11,4 +11,4 @@ export default WINDOW;
 export {
     setJSWindow,
     unsetJSWindow
-}
+};

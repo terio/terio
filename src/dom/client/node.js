@@ -21,7 +21,7 @@ function create(node, existingDOMNode, isHydrated = false, isRoot = false) {
         throw 'Hydration went wrong or parent is not empty!';
     }
     const nodeProps = Object.entries(node.props)
-                        .map(([name, value]) => getNativeProp(name, value));
+        .map(([name, value]) => getNativeProp(name, value));
     if(isHydrated) {
         const existingProps = existingDOMNode.getAttributeNames().reduce((pv, attr) => {
             pv[attr] = existingDOMNode.getAttribute(attr);

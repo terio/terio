@@ -29,10 +29,10 @@ function reduceNodeToString(node, isRoot = false) {
     }
     str += `<${node.type}${attrs ? ` ${attrs}` : ''}>`;
     str = node.children
-            .filter(child => child)
-            .reduce((pv, cv) => {
-                return pv + reduceNodeToString(cv, false);
-            }, str);
+        .filter(child => child)
+        .reduce((pv, cv) => {
+            return pv + reduceNodeToString(cv, false);
+        }, str);
     return str + `</${node.type}>`;
 }
 
