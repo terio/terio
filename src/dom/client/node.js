@@ -1,9 +1,11 @@
-import {isString, isFunction, getType, toLowerCase} from '../../utils/type';
+import {isString, isFunction, getType} from '../../utils/type';
+import {toLowerCase} from '../../utils/string';
 import {getNativeProp} from '../shared/props';
+import {LOKI_ROOT} from '../../constants/attr';
 
-function create(node, existingDOMNode, hydrate) {
+function create(node, existingDOMNode, isHydrated = false, isRoot = false) {
     if(isString(node)) {
-        if(!hydrate) {
+        if(!isHydrated) {
             return document.createTextNode(node);
         }
         if(getType(existingDOMNode) !== 'Text' || node !== existingDOMNode.textContent) {
@@ -13,14 +15,14 @@ function create(node, existingDOMNode, hydrate) {
     }
     if(isFunction(node.type)) {
         const component = new node.type(node.props, node.children);
-        return create(component.render(), existingDOMNode);
+        return create(component.render(), existingDOMNode, isHydrated, isRoot);
     }
-    if(hydrate && (!existingDOMNode || node.type !== toLowerCase(existingDOMNode.tagName))) {
+    if(isHydrated && (!existingDOMNode || node.type !== toLowerCase(existingDOMNode.tagName))) {
         throw 'Hydration went wrong or parent is not empty!';
     }
     const nodeProps = Object.entries(node.props)
                         .map(([name, value]) => getNativeProp(name, value));
-    if(hydrate) {
+    if(isHydrated) {
         const existingProps = existingDOMNode.getAttributeNames().reduce((pv, attr) => {
             pv[attr] = existingDOMNode.getAttribute(attr);
             return pv;
@@ -34,7 +36,7 @@ function create(node, existingDOMNode, hydrate) {
             }
         });
     }
-    if(!hydrate) {
+    if(!isHydrated) {
         const el = document.createElement(node.type);
         nodeProps.forEach((prop) => {
             if(!prop.isEvent) {
@@ -45,9 +47,12 @@ function create(node, existingDOMNode, hydrate) {
             }
             el.addEventListener(prop.name, prop.value);
         });
+        if(isRoot) {
+            el.setAttribute(LOKI_ROOT, '');
+        }
         node.children
             .filter(child => child)
-            .map(create)
+            .map(child => create(child))
             .forEach(el.appendChild.bind(el));
         return el;
     }
@@ -63,7 +68,7 @@ function create(node, existingDOMNode, hydrate) {
             if(!existingDOMNode.childNodes[idx]) {
                 throw 'Hydration went wrong or parent is not empty!';
             }
-            return create(child, existingDOMNode.childNodes[idx], hydrate);
+            return create(child, existingDOMNode.childNodes[idx], isHydrated);
         });
     return existingDOMNode;
 }
