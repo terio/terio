@@ -2,8 +2,10 @@ import {isString, isFunction, getType} from '../../utils/type';
 import {toLowerCase} from '../../utils/string';
 import {getNativeProp} from '../shared/props';
 import {LOKI_ROOT} from '../../constants/attr';
+import {create as createVirtualNode} from '../../vdom/node';
+import componentCache from '../../cache/component';
 
-function create(node, existingDOMNode, isHydrated = false, isRoot = false) {
+function create(node, existingDOMNode, currentOwner, isHydrated = false, isRoot = false) {
     if(isString(node)) {
         if(!isHydrated) {
             return document.createTextNode(node);
@@ -15,7 +17,7 @@ function create(node, existingDOMNode, isHydrated = false, isRoot = false) {
     }
     if(isFunction(node.type)) {
         const component = new node.type(node.props, node.children);
-        return create(component.render(), existingDOMNode, isHydrated, isRoot);
+        return create(<div>{component.render()}</div>, existingDOMNode, component, isHydrated, isRoot);
     }
     if(isHydrated && (!existingDOMNode || node.type !== toLowerCase(existingDOMNode.tagName))) {
         throw 'Hydration went wrong or parent is not empty!';
@@ -54,6 +56,9 @@ function create(node, existingDOMNode, isHydrated = false, isRoot = false) {
             .filter(child => child)
             .map(child => create(child))
             .forEach(el.appendChild.bind(el));
+        if(currentOwner) {
+            componentCache.set(el, currentOwner);
+        }
         return el;
     }
     nodeProps.forEach((prop) => {
@@ -68,8 +73,11 @@ function create(node, existingDOMNode, isHydrated = false, isRoot = false) {
             if(!existingDOMNode.childNodes[idx]) {
                 throw 'Hydration went wrong or parent is not empty!';
             }
-            return create(child, existingDOMNode.childNodes[idx], isHydrated);
+            return create(child, existingDOMNode.childNodes[idx], null, isHydrated);
         });
+    if(currentOwner) {
+        componentCache.set(existingDOMNode, currentOwner);
+    }
     return existingDOMNode;
 }
 

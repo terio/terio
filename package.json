@@ -6,7 +6,8 @@
   "author": "subramanyam963@gmail.com",
   "license": "MIT",
   "scripts": {
-    "install": "babel src --out-dir lib"
+    "install": "babel src --out-dir lib",
+    "lint": "eslint src"
   },
   "devDependencies": {
     "@babel/cli": "^7.0.0-beta.39",

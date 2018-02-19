@@ -3,6 +3,7 @@ import {isString, isFunction} from '../../utils/type';
 import {getNativeProp} from '../shared/props';
 import {VOID_ELEMENTS} from './element';
 import {LOKI_ROOT} from '../../constants/attr';
+import {create as createVirtualNode} from '../../vdom/node';
 
 function reduceNodeToString(node, isRoot = false) {
     if(isString(node)) {
@@ -10,7 +11,7 @@ function reduceNodeToString(node, isRoot = false) {
     }
     if(isFunction(node.type)) {
         const component = new node.type(node.props, node.children);
-        return reduceNodeToString(component.render(), isRoot);
+        return reduceNodeToString(<div>{component.render()}</div>, isRoot);
     }
     let str = '';
     let attrs = Object.entries(node.props)
