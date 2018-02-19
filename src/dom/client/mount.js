@@ -1,5 +1,6 @@
 import {create as createDOMNode} from './node';
 import {LOKI_ROOT} from '../../constants/attr';
+import {isFunction} from '../../utils/type';
 
 export default function mount(node, parent) {
     let existingDOMNode;
@@ -8,6 +9,9 @@ export default function mount(node, parent) {
         parent.firstChild.hasAttribute(LOKI_ROOT);
     if(!IS_HYDRATED && parent.childNodes.length) {
         throw 'parent is not empty!';
+    }
+    if(!isFunction(node.type)) {
+        throw 'root should be component or a function!';
     }
     if(IS_HYDRATED) {
         existingDOMNode = parent.firstChild;
