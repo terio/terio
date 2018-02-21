@@ -1,32 +1,64 @@
-import {isString, isFunction, getType} from '../../utils/type';
+import {isString, isFunction, getType, areDifferentTypes} from '../../utils/type';
 import {toLowerCase} from '../../utils/string';
 import {getNativeProp} from '../shared/props';
 import {LOKI_ROOT} from '../../constants/attr';
 import {create as createVirtualNode} from '../../vdom/node';
 import componentCache from '../../cache/component';
 
-function create(node, existingDOMNode, currentOwner, isHydrated = false, isRoot = false) {
+function isChanged(newNode, oldNode) {
+    if(areDifferentTypes(newNode, oldNode)) {
+        return true;
+    }
+    if(isString(newNode) && newNode !== oldNode) {
+        return true;
+    }
+    if(newNode.type !== oldNode.type) {
+        return true;
+    }
+    const newProps = Object.entries(newNode.props);
+    const oldProps = Object.entries(oldNode.props);
+    if(newProps.length !== oldProps.length) {
+        return true;
+    }
+    for(let i = 0; i < newProps.length; i++) {
+        for(let j = 0; j < 2; j++) {
+            if(newProps[i][j] !== oldProps[i][j]) {
+                return true;
+            }
+        }
+    }
+    return false;
+}
+function create($parent, parent, idx, hydrate = false, isRoot = false) {
+    let $node = $parent.childNodes[idx];
+    let node = parent.children[idx];
     if(isString(node)) {
-        if(!isHydrated) {
+        if(!hydrate) {
             return document.createTextNode(node);
         }
-        if(getType(existingDOMNode) !== 'Text' || node !== existingDOMNode.textContent) {
+        if(getType($node) !== 'Text' || node !== $node.textContent) {
             throw 'Hydration went wrong or parent is not empty!';
         }
-        return existingDOMNode;
+        return $node;
     }
     if(isFunction(node.type)) {
-        const component = new node.type(node.props, node.children);
-        return create(<div>{component.render()}</div>, existingDOMNode, component, isHydrated, isRoot);
+        const component = new node.type(node.props, node.children, function rerender() {
+            parent.children[idx] = <div {...node.props}>{component.render()}</div>;
+            parent.children[idx].$$component = component;
+            update($parent, parent, parent.children[idx], node, idx);
+        });
+        parent.children[idx] = node = <div {...node.props}>{component.render()}</div>;
+        node.$$component = component;
+        return create($parent, parent, idx, hydrate, isRoot);
     }
-    if(isHydrated && (!existingDOMNode || node.type !== toLowerCase(existingDOMNode.tagName))) {
+    if(hydrate && (!$node || node.type !== toLowerCase($node.tagName))) {
         throw 'Hydration went wrong or parent is not empty!';
     }
     const nodeProps = Object.entries(node.props)
         .map(([name, value]) => getNativeProp(name, value));
-    if(isHydrated) {
-        const existingProps = existingDOMNode.getAttributeNames().reduce((pv, attr) => {
-            pv[attr] = existingDOMNode.getAttribute(attr);
+    if(hydrate) {
+        const existingProps = $node.getAttributeNames().reduce((pv, attr) => {
+            pv[attr] = $node.getAttribute(attr);
             return pv;
         }, {});
         nodeProps.forEach((prop) => {
@@ -38,7 +70,7 @@ function create(node, existingDOMNode, currentOwner, isHydrated = false, isRoot 
             }
         });
     }
-    if(!isHydrated) {
+    if(!hydrate) {
         const el = document.createElement(node.type);
         nodeProps.forEach((prop) => {
             if(!prop.isEvent) {
@@ -53,30 +85,44 @@ function create(node, existingDOMNode, currentOwner, isHydrated = false, isRoot 
             el.setAttribute(LOKI_ROOT, '');
         }
         node.children
-            .map(child => create(child))
+            .map((child, _idx) => create(el, node, _idx))
             .forEach(el.appendChild.bind(el));
-        if(currentOwner) {
-            componentCache.set(el, currentOwner);
-        }
         return el;
     }
     nodeProps.forEach((prop) => {
         if(!prop.isEvent) {
             return;
         }
-        existingDOMNode.addEventListener(prop.name, prop.value);
+        $node.addEventListener(prop.name, prop.value);
     });
     node.children
-        .forEach((child, idx) => {
-            if(!existingDOMNode.childNodes[idx]) {
+        .forEach((child, _idx) => {
+            if(!$node.childNodes[_idx]) {
                 throw 'Hydration went wrong or parent is not empty!';
             }
-            return create(child, existingDOMNode.childNodes[idx], null, isHydrated);
+            return create($node, node, _idx, hydrate);
         });
-    if(currentOwner) {
-        componentCache.set(existingDOMNode, currentOwner);
+    return $node;
+}
+
+function update($parent, parent, newNode, oldNode, idx = 0) {
+    if(!oldNode) {
+        console.log('mutation 1')
+        return $parent.appendChild(create($parent, parent, idx));
     }
-    return existingDOMNode;
+    if(!newNode) {
+        console.log('mutation 2')
+        return $parent.removeChild($parent.childNodes[idx]);
+    }
+    if(isChanged(newNode, oldNode)) {
+        console.log('mutation 3', newNode, oldNode)
+        return $parent.replaceChild(create($parent, parent, idx), $parent.childNodes[idx]);;
+    }
+    if(!isString(newNode)) {
+        for(let i = 0; i < oldNode.children.length; i++) {
+            update($parent.childNodes[idx], parent.children[idx], newNode.children[i], oldNode.children[i], i);
+        }
+    }
 }
 
 export {

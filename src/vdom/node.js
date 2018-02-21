@@ -1,8 +1,16 @@
+import {isVNode} from '../utils/type';
+import {toString} from '../utils/string';
+
 function create(type, props, ...children) {
     return {
         type,
-        props: Object.freeze(props || {}),
-        children: Object.freeze(children.filter(child => child) || []),
+        props: props || {},
+        children: children.map(child => {
+            if(isVNode(child)) {
+                return child;
+            }
+            return toString(child);
+        }) || [],
         $$vnode: true
     };
 }

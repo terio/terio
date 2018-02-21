@@ -21,9 +21,29 @@ function isFunction(variable) {
 function isArray(variable) {
     return getType(variable) === TYPE.array;
 }
+function areDifferentTypes(a, b) {
+    return getType(a) !== getType(b);
+}
+function isDefined(variable) {
+    return getType(variable) !== TYPE.undefined;
+}
+function isNull(variable) {
+    return getType(variable) !== TYPE.null;
+}
+function isObject(variable) {
+    return getType(variable) !== TYPE.object;
+}
+function isVNode(variable) {
+    return variable && variable.$$vnode;
+}
 export {
     getType,
     isString,
     isFunction,
-    isArray
+    isArray,
+    areDifferentTypes,
+    isDefined,
+    isNull,
+    isObject,
+    isVNode
 };

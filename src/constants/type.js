@@ -6,5 +6,6 @@ export default {
     'boolean': 'Boolean',
     'undefined': 'Undefined',
     'null': 'Null',
-    'array': 'Array'
+    'array': 'Array',
+    'symbol': 'Symbol'
 };
