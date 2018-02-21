@@ -1,11 +1,13 @@
 import {create as createVirtualNode} from '../vdom/node';
-// import componentStore from '../store/component';
-import {shallowMerge} from '../utils/object';
 
 export default class Component {
-    constructor(props, children=[]) {
-        this.props = shallowMerge({}, props);
-        this.children = children.slice();
+    constructor(props, children) {
+        this.props = props;
+        this.children = children;
+        this.state = {};
+    }
+    setState() {
+
     }
     render() {
         return <div></div>;

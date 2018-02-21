@@ -53,7 +53,6 @@ function create(node, existingDOMNode, currentOwner, isHydrated = false, isRoot 
             el.setAttribute(LOKI_ROOT, '');
         }
         node.children
-            .filter(child => child)
             .map(child => create(child))
             .forEach(el.appendChild.bind(el));
         if(currentOwner) {
@@ -68,7 +67,6 @@ function create(node, existingDOMNode, currentOwner, isHydrated = false, isRoot 
         existingDOMNode.addEventListener(prop.name, prop.value);
     });
     node.children
-        .filter(child => child)
         .forEach((child, idx) => {
             if(!existingDOMNode.childNodes[idx]) {
                 throw 'Hydration went wrong or parent is not empty!';
