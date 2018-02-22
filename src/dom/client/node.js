@@ -1,4 +1,4 @@
-import {isString, isFunction, getType, areDifferentTypes} from '../../utils/type';
+import {isString, isFunction, getType, areDifferentTypes, isComponentNode} from '../../utils/type';
 import {toLowerCase} from '../../utils/string';
 import {getNativeProp} from '../shared/props';
 import {LOKI_ROOT} from '../../constants/attr';
@@ -9,7 +9,10 @@ function isChanged(newNode, oldNode) {
     if(areDifferentTypes(newNode, oldNode)) {
         return true;
     }
-    if(isString(newNode) && newNode !== oldNode) {
+    if(isString(newNode)) {
+        if(!isString(oldNode) || newNode !== oldNode) {
+            return true;
+        }
         return true;
     }
     if(newNode.type !== oldNode.type) {
@@ -46,10 +49,13 @@ function create($parent, parent, idx, hydrate = false, isRoot = false) {
             parent.children[idx] = <div {...node.props}>{component.render()}</div>;
             parent.children[idx].$$component = component;
             update($parent, parent, parent.children[idx], node, idx);
+            node = parent.children[idx];
         });
         parent.children[idx] = node = <div {...node.props}>{component.render()}</div>;
         node.$$component = component;
-        return create($parent, parent, idx, hydrate, isRoot);
+        $node = create($parent, parent, idx, hydrate, isRoot);
+        component.mounted();
+        return $node;
     }
     if(hydrate && (!$node || node.type !== toLowerCase($node.tagName))) {
         throw 'Hydration went wrong or parent is not empty!';
@@ -112,11 +118,16 @@ function update($parent, parent, newNode, oldNode, idx = 0) {
     }
     if(!newNode) {
         console.log('mutation 2')
-        return $parent.removeChild($parent.childNodes[idx]);
+        unMountNode(oldNode);
+        let $node = $parent.removeChild($parent.childNodes[idx]);
+        return $node;
     }
     if(isChanged(newNode, oldNode)) {
         console.log('mutation 3', newNode, oldNode)
-        return $parent.replaceChild(create($parent, parent, idx), $parent.childNodes[idx]);;
+        unMountNode(oldNode);
+        let $node = create($parent, parent, idx);
+        $parent.replaceChild($node, $parent.childNodes[idx]);;
+        return $node;
     }
     if(!isString(newNode)) {
         for(let i = 0; i < oldNode.children.length; i++) {
@@ -124,7 +135,12 @@ function update($parent, parent, newNode, oldNode, idx = 0) {
         }
     }
 }
-
+function unMountNode(node) {
+    if(isComponentNode(node)) {
+        node.$$component.willUnmount();
+        node.children.forEach(unMountNode);
+    }
+}
 export {
     create
 };

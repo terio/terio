@@ -36,6 +36,9 @@ function isObject(variable) {
 function isVNode(variable) {
     return variable && variable.$$vnode;
 }
+function isComponentNode(variable) {
+    return variable && variable.$$component;
+}
 export {
     getType,
     isString,
@@ -45,5 +48,6 @@ export {
     isDefined,
     isNull,
     isObject,
-    isVNode
+    isVNode,
+    isComponentNode
 };
