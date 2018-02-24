@@ -3,7 +3,6 @@ import {toLowerCase} from '../../utils/string';
 import {getNativeProp} from '../shared/props';
 import {TERIO_ROOT} from '../../constants/attr';
 import {create as createVirtualNode} from '../../vdom/node';
-import componentCache from '../../cache/component';
 
 function isChanged(newNode, oldNode) {
     if(areDifferentTypes(newNode, oldNode)) {
@@ -113,24 +112,22 @@ function create($parent, parent, idx, hydrate = false, isRoot = false) {
 
 function update($parent, parent, newNode, oldNode, idx = 0) {
     if(!oldNode) {
-        console.log('mutation 1')
         return $parent.appendChild(create($parent, parent, idx));
     }
     if(!newNode) {
-        console.log('mutation 2')
         unMountNode(oldNode);
         let $node = $parent.removeChild($parent.childNodes[idx]);
         return $node;
     }
     if(isChanged(newNode, oldNode)) {
-        console.log('mutation 3', newNode, oldNode)
         unMountNode(oldNode);
         let $node = create($parent, parent, idx);
-        $parent.replaceChild($node, $parent.childNodes[idx]);;
+        $parent.replaceChild($node, $parent.childNodes[idx]);
         return $node;
     }
     if(!isString(newNode)) {
-        for(let i = 0; i < oldNode.children.length; i++) {
+        const len = Math.max(oldNode.children.length, newNode.children.length);
+        for(let i = 0; i < len; i++) {
             update($parent.childNodes[idx], parent.children[idx], newNode.children[i], oldNode.children[i], i);
         }
     }

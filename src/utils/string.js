@@ -29,7 +29,7 @@ function toString(variable) {
         return '-0';
     }
     return `${variable}`;
- }
+}
 export {
     toLowerCase,
     upperFirst,

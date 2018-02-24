@@ -17,5 +17,8 @@
     "eslint": "^4.17.0",
     "eslint-config-terio": "file:../eslint-config-terio"
   },
-  "dependencies": {}
+  "dependencies": {},
+  "peerDependencies": {
+    "eslint-plugin-react": "7.6.1"
+  }
 }

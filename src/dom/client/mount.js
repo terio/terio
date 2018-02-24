@@ -16,6 +16,5 @@ export default function mount(node, $parent) {
         children: [node]
     };
     const $node = createDOMNode($parent, tree, 0, IS_HYDRATED, true);
-    console.log('Tree is ', tree);
     return IS_HYDRATED ? $node : $parent.appendChild($node);
 }
