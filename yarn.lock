@@ -592,7 +592,7 @@ babel-code-frame@^6.22.0:
     esutils "^2.0.2"
     js-tokens "^3.0.2"
 
-"babel-preset-loki@file:../babel-preset-loki":
+"babel-preset-terio@file:../babel-preset-terio":
   version "0.1.0"
 
 babylon@7.0.0-beta.39:
@@ -852,7 +852,7 @@ escape-string-regexp@^1.0.2, escape-string-regexp@^1.0.5:
   version "1.0.5"
   resolved "https://registry.yarnpkg.com/escape-string-regexp/-/escape-string-regexp-1.0.5.tgz#1b61c0562190a8dff6ae3bb2cf0200ca130b86d4"
 
-"eslint-config-loki@file:../eslint-config-loki":
+"eslint-config-terio@file:../eslint-config-terio":
   version "0.1.0"
 
 eslint-scope@^3.7.1:

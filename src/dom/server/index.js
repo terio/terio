@@ -2,7 +2,7 @@ import {runInBrowserContext} from './browser';
 import {isString, isFunction} from '../../utils/type';
 import {getNativeProp} from '../shared/props';
 import {VOID_ELEMENTS} from './element';
-import {LOKI_ROOT} from '../../constants/attr';
+import {TERIO_ROOT} from '../../constants/attr';
 import {create as createVirtualNode} from '../../vdom/node';
 
 function reduceNodeToString(node, isRoot = false) {
@@ -22,7 +22,7 @@ function reduceNodeToString(node, isRoot = false) {
         .map(prop => `${prop.name}="${prop.value}"`)
         .join(' ');
     if(isRoot) {
-        attrs = [attrs, LOKI_ROOT].join(' ');
+        attrs = [attrs, TERIO_ROOT].join(' ');
         isRoot = false;
     }
     if(VOID_ELEMENTS.has(node.type)) {

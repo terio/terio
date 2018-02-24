@@ -1,11 +1,11 @@
 import {create as createDOMNode} from './node';
-import {LOKI_ROOT} from '../../constants/attr';
+import {TERIO_ROOT} from '../../constants/attr';
 import {isFunction} from '../../utils/type';
 
 export default function mount(node, $parent) {
     const IS_HYDRATED = $parent.childNodes.length === 1 &&
         $parent.firstChild.hasAttribute &&
-        $parent.firstChild.hasAttribute(LOKI_ROOT);
+        $parent.firstChild.hasAttribute(TERIO_ROOT);
     if(!IS_HYDRATED && $parent.childNodes.length) {
         throw 'parent is not empty!';
     }

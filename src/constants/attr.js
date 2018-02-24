@@ -1,5 +1,5 @@
-const LOKI_ROOT = 'data-lokiroot';
+const TERIO_ROOT = 'data-terioroot';
 
 export {
-    LOKI_ROOT
+    TERIO_ROOT
 };

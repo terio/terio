@@ -1,7 +1,7 @@
 import {isString, isFunction, getType, areDifferentTypes, isComponentNode} from '../../utils/type';
 import {toLowerCase} from '../../utils/string';
 import {getNativeProp} from '../shared/props';
-import {LOKI_ROOT} from '../../constants/attr';
+import {TERIO_ROOT} from '../../constants/attr';
 import {create as createVirtualNode} from '../../vdom/node';
 import componentCache from '../../cache/component';
 
@@ -88,7 +88,7 @@ function create($parent, parent, idx, hydrate = false, isRoot = false) {
             el.addEventListener(prop.name, prop.value);
         });
         if(isRoot) {
-            el.setAttribute(LOKI_ROOT, '');
+            el.setAttribute(TERIO_ROOT, '');
         }
         node.children
             .map((child, _idx) => create(el, node, _idx))
