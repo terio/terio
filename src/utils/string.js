@@ -16,6 +16,9 @@ function upperFirst(str) {
 }
 function toString(variable) {
     const type = getType(variable);
+    if(TYPE.string === TYPE[type]) {
+        return variable;
+    }
     if(TYPE.null === TYPE[type] || TYPE.undefined === TYPE[type]) {
         return '';
     }

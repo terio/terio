@@ -1,8 +1,9 @@
-import {isString, isFunction, getType, areDifferentTypes, isComponentNode} from '../../utils/type';
+import {isString, isFunction, getType, areDifferentTypes, isTextNode} from '../../utils/type';
 import {toLowerCase} from '../../utils/string';
 import {getNativeProp} from '../shared/props';
 import {TERIO_ROOT} from '../../constants/attr';
 import {create as createVirtualNode} from '../../vdom/node';
+import {isComponent} from '../../components/base';
 
 function isChanged(newNode, oldNode) {
     if(areDifferentTypes(newNode, oldNode)) {
@@ -133,7 +134,7 @@ function update($parent, parent, newNode, oldNode, idx = 0) {
     }
 }
 function unMountNode(node) {
-    if(isComponentNode(node)) {
+    if(isComponent(node)) {
         node.$$component.willUnmount();
         node.children.forEach(unMountNode);
     }

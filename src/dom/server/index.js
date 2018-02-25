@@ -1,43 +1,30 @@
 import {runInBrowserContext} from './browser';
-import {isString, isFunction} from '../../utils/type';
-import {getNativeProp} from '../shared/props';
-import {VOID_ELEMENTS} from './element';
 import {TERIO_ROOT} from '../../constants/attr';
 import {create as createVirtualNode} from '../../vdom/node';
+import {isString} from '../../utils/type';
 
 function reduceNodeToString(node, isRoot = false) {
     if(isString(node)) {
         return node;
     }
-    if(isFunction(node.type)) {
-        const component = new node.type(node.props, node.children);
-        return reduceNodeToString(<div>{component.render()}</div>, isRoot);
-    }
     let str = '';
-    let attrs = Object.entries(node.props)
-        .map(([name, value]) => {
-            return getNativeProp(name, value);
-        })
-        .filter(prop => !prop.isEvent && isString(prop.value))
-        .map(prop => `${prop.name}="${prop.value}"`)
-        .join(' ');
+    let attrs = node.props.toString();
     if(isRoot) {
         attrs = [attrs, TERIO_ROOT].join(' ');
-        isRoot = false;
     }
-    if(VOID_ELEMENTS.has(node.type)) {
+    if(node.isSelfClosing) {
         return `<${node.type}${attrs ? ` ${attrs}` : ''}/>`;
     }
     str += `<${node.type}${attrs ? ` ${attrs}` : ''}>`;
     str = node.children
         .reduce((pv, cv) => {
-            return pv + reduceNodeToString(cv, false);
+            return pv + reduceNodeToString(cv);
         }, str);
     return str + `</${node.type}>`;
 }
 
 function renderToString(node, dom, win) {
-    return runInBrowserContext(reduceNodeToString, dom, win, node, true);
+    return runInBrowserContext(reduceNodeToString, dom, win, node.inflate(), true);
 }
 
 export {

@@ -15,6 +15,12 @@ function getType(variable) {
 function isString(variable) {
     return getType(variable) === TYPE.string;
 }
+function isNumber(variable) {
+    return getType(variable) === TYPE.number;
+}
+function isBoolean(variable) {
+    return getType(variable) === TYPE.boolean;
+}
 function isFunction(variable) {
     return getType(variable) === TYPE.function;
 }
@@ -31,13 +37,13 @@ function isNull(variable) {
     return getType(variable) !== TYPE.null;
 }
 function isObject(variable) {
-    return getType(variable) !== TYPE.object;
-}
-function isVNode(variable) {
-    return variable && variable.$$vnode;
+    return variable instanceof Object;
 }
 function isComponentNode(variable) {
     return variable && variable.$$component;
+}
+function isTextNode(variable) {
+    return variable instanceof Text;
 }
 export {
     getType,
@@ -48,6 +54,8 @@ export {
     isDefined,
     isNull,
     isObject,
-    isVNode,
-    isComponentNode
+    isComponentNode,
+    isNumber,
+    isBoolean,
+    isTextNode
 };
