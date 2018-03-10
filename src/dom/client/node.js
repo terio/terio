@@ -33,10 +33,47 @@ function removeProps($node, props) {
     removeTextProps($node, props.textProps);
     removeEventListenerProps($node, props.events);
 }
-function patchNode($node, diff) {
+function applyDiff($parent, newNode, oldNode, idx = 0) {
+    const $node = $parent.childNodes[idx];
+
+    const diff = VNode.diff(newNode, oldNode);
+
+    const diffSummary = {
+        isNodeObsolete: false
+    };
+
+    if(!diff.SECOND_NODE_EXISTS) {
+        const $newNode = create(newNode);
+        $parent.appendChild($newNode);
+
+        doPostAttachTasks($newNode, newNode, idx);
+
+        diffSummary.isNodeObsolete = true;
+        return diffSummary;
+    }
+    if(!diff.FIRST_NODE_EXISTS) {
+        unmount($node, oldNode, idx);
+
+        diffSummary.isNodeObsolete = true;
+        return diffSummary;
+    }
+    if(diff.ARE_DIFFERENT_TYPES || diff.ARE_DIFFERENT_TEXTS) {
+        doPreDetachTasks($node, oldNode, idx);
+
+        const $newNode = create(newNode);
+        $parent.replaceChild($newNode, $node);
+
+        doPostAttachTasks($newNode, newNode, idx);
+
+        diffSummary.isNodeObsolete = true;
+        return diffSummary;
+    }
+
     setProps($node, diff.ADDED_PROPS);
     removeProps($node, diff.REMOVED_PROPS);
     setProps($node, diff.UPDATED_PROPS);
+
+    return diffSummary;
 }
 function doPostAttachTasks($node, node, idx = 0) {
     if(isString(node)) {
@@ -110,25 +147,12 @@ function create(node) {
 
 function update($parent, newNode, oldNode, idx = 0) {
     const $node = $parent.childNodes[idx];
-    if(!oldNode) {
-        const $newNode = create(newNode);
-        $parent.appendChild($newNode);
-        doPostAttachTasks($newNode, newNode);
-        return $newNode;
-    }
-    if(!newNode) {
-        return unmount($node, oldNode, idx);
-    }
-    const diff = VNode.diff(newNode, oldNode);
-    if(diff.ARE_DIFFERENT_TYPES || diff.ARE_DIFFERENT_TEXTS) {
-        doPreDetachTasks($node, oldNode, idx);
-        const $newNode = create(newNode);
-        $parent.replaceChild($newNode, $node);
-        doPostAttachTasks($newNode, newNode);
-        return $newNode;
-    }
-    patchNode($node, diff);
 
+    const diffSummary = applyDiff($parent, newNode, oldNode, idx);
+    if(diffSummary.isNodeObsolete) {
+        return;
+    }
+    
     if(!isString(newNode)) {
         const len = Math.max(oldNode.children.length, newNode.children.length);
         for(let i = 0; i < len; i++) {

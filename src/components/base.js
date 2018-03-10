@@ -13,7 +13,7 @@ export default class Component {
         this.state = Object.freeze(Object.assign({}, state));
         if(this.onStateChange) {
             // this.onStateChange();
-            defer(this.onStateChange)
+            defer(this.onStateChange);
         }
     }
     render() {

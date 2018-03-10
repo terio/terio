@@ -64,12 +64,22 @@ export default class VNode {
 }
 VNode.diff = function(firstNode, secondNode) {
     const diff = {
+        FIRST_NODE_EXISTS: true,
+        SECOND_NODE_EXISTS: true,
         ARE_DIFFERENT_TYPES: false,
         ARE_DIFFERENT_TEXTS: false,
         ADDED_PROPS: new PropList(),
         REMOVED_PROPS: new PropList(),
         UPDATED_PROPS: new PropList()
     };
+    if(!firstNode) {
+        diff.FIRST_NODE_EXISTS = false;
+        return diff;
+    }
+    if(!secondNode) {
+        diff.SECOND_NODE_EXISTS = false;
+        return diff;
+    }
     if(areDifferentTypes(firstNode, secondNode)) {
         diff.ARE_DIFFERENT_TYPES = true;
         return diff;
