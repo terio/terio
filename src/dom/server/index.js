@@ -2,16 +2,14 @@ import {runInBrowserContext} from './browser';
 import {TERIO_ROOT} from '../../constants/attr';
 import {create as createVirtualNode} from '../../vdom/node';
 import {isString} from '../../utils/type';
+import Prop from '../../vdom/prop';
 
-function reduceNodeToString(node, isRoot = false) {
+function reduceNodeToString(node) {
     if(isString(node)) {
         return node;
     }
     let str = '';
     let attrs = node.props.toString();
-    if(isRoot) {
-        attrs = [attrs, TERIO_ROOT].join(' ');
-    }
     if(node.isSelfClosing) {
         return `<${node.type}${attrs ? ` ${attrs}` : ''}/>`;
     }
@@ -24,7 +22,10 @@ function reduceNodeToString(node, isRoot = false) {
 }
 
 function renderToString(node, dom, win) {
-    return runInBrowserContext(reduceNodeToString, dom, win, node.inflate(), true);
+    node = node.clone();
+    node.props.add(new Prop(TERIO_ROOT, ''));
+    node = node.inflate();
+    return runInBrowserContext(reduceNodeToString, dom, win, node);
 }
 
 export {

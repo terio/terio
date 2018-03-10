@@ -1,33 +1,73 @@
 import {isProp, default as Prop} from './prop';
-import {isObject, isNumber, isBoolean, isString} from '../utils/type';
+import {isObject, isNumber, isBoolean, isString, isDefined, isArray} from '../utils/type';
 import {toString} from '../utils/string';
 
 export default class PropList {
     constructor(props) {
         if(isPropList(props)) {
-            return Object.create(props);
+            return new PropList(props.toArray());
         }
+        props = props || {};
         if(!isObject(props)) {
             throw 'Not an Object';
         }
+        if(isArray(props)) {
+            if(isDefined(props[0]) && !isProp(props[0])) {
+                throw 'Invalid arguments passed';
+            }
+            this.$$props = props.slice();
+            return this;
+        }
         this.originalProps = props;
-        this.props = Object.entries(props)
+    }
+    add(prop) {
+        this.$$props = this.$$props || Object.entries(this.originalProps)
             .map(([name, value]) => {
                 return new Prop(name, value);
             });
+        this.$$props.push(prop);
     }
     get events() {
-        return this.props.filter(function(prop) {
+        return this.$$events = this.$$events || this.toArray().filter(function(prop) {
             return prop.isEvent;
         });
     }
+    get textProps() {
+        return this.$$nativeProps = this.$$nativeProps || this.toArray().filter(function(prop) {
+            return !prop.isEvent && !prop.isCustomProp;
+        });
+    }
     toString() {
-        return this.props
+        return this.$$string = this.$$string || this.toArray()
             .filter(prop => !prop.isEvent && (isString(prop.value) || isNumber(prop.value) || isBoolean(prop.value)))
             .map(prop => `${prop.name}="${prop.value}"`)
             .join(' ');
     }
-};
+    toMap() {
+        return this.$$map = this.$$map || this.toArray().reduce((pv, cv) => {
+            pv[cv.name] = cv;
+            return pv;
+        }, {});
+    }
+    has(name) {
+        return this.toMap().hasOwnProperty(name);
+    }
+    getProp(name) {
+        return this.toArray().find((prop) => prop.name === name);
+    }
+    toArray() {
+        return this.$$props = this.$$props || Object.entries(this.originalProps)
+            .map(([name, value]) => {
+                return new Prop(name, value);
+            });
+    }
+    size() {
+        return this.$$props.length;
+    }
+    clone() {
+        return new PropList(this.toArray());
+    }
+}
 
 function isPropList(props) {
     return props instanceof PropList;

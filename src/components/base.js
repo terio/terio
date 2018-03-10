@@ -1,10 +1,8 @@
 import {create as createVirtualNode} from '../vdom/node';
 import {defer} from '../utils/function';
-import EventTarget from '../events/event-target';
 
-export default class Component extends EventTarget {
+export default class Component {
     constructor(props, children) {
-        super();
         this.props = props;
         this.children = children;
         this.state = Object.freeze({});
@@ -13,7 +11,10 @@ export default class Component extends EventTarget {
     willUnmount(){}
     setState(state) {
         this.state = Object.freeze(Object.assign({}, state));
-        defer(this.rerender);
+        if(this.onStateChange) {
+            // this.onStateChange();
+            defer(this.onStateChange)
+        }
     }
     render() {
         return <div></div>;
@@ -28,4 +29,4 @@ function isComponentClass(fn) {
 export {
     isComponent,
     isComponentClass
-}
+};
