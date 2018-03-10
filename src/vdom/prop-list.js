@@ -21,11 +21,14 @@ export default class PropList {
         this.originalProps = props;
     }
     add(prop) {
-        this.$$props = this.$$props || Object.entries(this.originalProps)
-            .map(([name, value]) => {
-                return new Prop(name, value);
-            });
+        this.$$props = this.toArray();
         this.$$props.push(prop);
+
+        //need to reset cache
+        delete this.$$map;
+        delete this.$$string;
+        delete this.$$events;
+        delete this.$$nativeProps;
     }
     get events() {
         return this.$$events = this.$$events || this.toArray().filter(function(prop) {
