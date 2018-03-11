@@ -55,7 +55,7 @@ export default class PropList {
     has(name) {
         return this.toMap().hasOwnProperty(name);
     }
-    getProp(name) {
+    get(name) {
         return this.toArray().find((prop) => prop.name === name);
     }
     toArray() {

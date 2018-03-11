@@ -98,13 +98,13 @@ VNode.diff = function(firstNode, secondNode) {
             diff.REMOVED_PROPS.add(prop);
             continue;
         }
-        if(prop.value !== firstNode.props.getProp(prop.name)) {
+        if(prop.value !== firstNode.props.get(prop.name)) {
             if(prop.isEvent) {
                 diff.REMOVED_PROPS.add(prop);
-                diff.ADDED_PROPS.add(firstNode.props.getProp(prop.name));
+                diff.ADDED_PROPS.add(firstNode.props.get(prop.name));
                 continue;
             }
-            diff.UPDATED_PROPS.add(firstNode.props.getProp(prop.name));
+            diff.UPDATED_PROPS.add(firstNode.props.get(prop.name));
         }
     }
     for(const prop of firstNode.props.toArray()) {

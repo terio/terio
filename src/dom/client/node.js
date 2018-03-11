@@ -3,6 +3,7 @@ import {toLowerCase} from '../../utils/string';
 import {create as createVirtualNode, default as VNode} from '../../vdom/node';
 import {isComponent} from '../../classes/component';
 import {TERIO_ROOT} from '../../constants/attr';
+import PropList from '../../vdom/prop-list';
 
 function setTextProps($node, attrs) {
     attrs.forEach((prop) => {
@@ -81,7 +82,7 @@ function doPostAttachTasks($node, node, idx = 0) {
     if(isComponent(node.component)) {
         const component = node.component;
         component.onStateChange = function() {
-            const renderedComponent = component.render().inflate();
+            const renderedComponent = component.render().inflate(`${node.id}.0`);
             update($node, renderedComponent, node.children[0], idx);
             node.children = [renderedComponent];
         };
@@ -116,6 +117,7 @@ function hydrate($node, node) {
     }, {});
     node.props.textProps.forEach((prop) => {
         if(prop.name === TERIO_ROOT) {
+            setTextProps($node, new PropList([node.props.get(TERIO_ROOT)]));
             return;
         }
         if(!existingProps[prop.name] || existingProps[prop.name] !== prop.value) {
@@ -171,7 +173,10 @@ function mount($parent, node, shouldHydrate = false) {
         $node = $parent.appendChild(create(node));
     }
     doPostAttachTasks($node, node);
-    return $node;
+    return {
+        node,
+        $node
+    };
 }
 export {
     mount,
