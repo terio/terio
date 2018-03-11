@@ -1,7 +1,7 @@
 import {mount as mountNode} from './node';
 import {TERIO_ROOT} from '../../constants/attr';
 import {isFunction} from '../../utils/type';
-import {isComponentClass} from '../../components/base';
+import {isComponentClass} from '../../classes/component';
 import Prop from '../../vdom/prop';
 
 export default function mount(node, $parent) {

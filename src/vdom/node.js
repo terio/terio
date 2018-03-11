@@ -1,7 +1,7 @@
-import {isString, isDefined, isFunction, getType, areDifferentTypes, isTextNode} from '../utils/type';
+import {isString, isDefined, isFunction, areDifferentTypes} from '../utils/type';
 import {toString} from '../utils/string';
 import PropList from './prop-list';
-import {isComponentClass} from '../components/base';
+import {isComponentClass} from '../classes/component';
 import {VOID_ELEMENTS} from '../constants/element';
 
 export default class VNode {
@@ -14,22 +14,22 @@ export default class VNode {
             }
             return toString(child);
         }));
-        this.isSelfClosing = isString(this.type) && VOID_ELEMENTS.has(this.type);
+        this.isSelfClosing = isFunction(this.type) || VOID_ELEMENTS.has(this.type);
     }
-    inflate() {
+    inflate(id) {
         if(isComponentClass(this.type)) {
             const component = new this.type(this.props, this.children);
             const vnode =  <div {...this.props}>{component.render()}</div>;
             vnode.component = component;
-            vnode.originalNode = this;
-            return vnode.inflate();
+            return vnode.inflate(id);
         }
         const newNode = this.clone();
-        newNode.children = newNode.children.map(function(child) {
+        newNode.id = id;
+        newNode.children = newNode.children.map(function(child, idx) {
             if(isString(child)) {
                 return child;
             }
-            return child.inflate();
+            return child.inflate(`${id}.${idx}`);
         });
         return newNode;
     }
@@ -37,18 +37,18 @@ export default class VNode {
         this.$$component = component;
         return component;
     }
-    set originalNode(node) {
-        this.$$originalNode = node;
-        return node;
+    set id(id) {
+        this.$$id = id;
+        return id;
     }
-    get originalNode() {
-        return this.$$originalNode;
+    get id() {
+        return this.$$id;
     }
     get component() {
         return this.$$component;
     }
     isInflated() {
-        return isDefined(this.component) && isDefined(this.originalNode);
+        return isDefined(this.component);
     }
     isComponentNode() {
         return !!this.component;
@@ -57,7 +57,6 @@ export default class VNode {
         const node = new VNode(this.type, this.props, ...this.children);
         if(this.isInflated()) {
             node.component = this.component;
-            node.originalNode = this.originalNode;
         }
         return node;
     }

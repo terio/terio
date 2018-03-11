@@ -1,5 +1,5 @@
 import {isProp, default as Prop} from './prop';
-import {isObject, isNumber, isBoolean, isString, isDefined, isArray} from '../utils/type';
+import {isObject, isDefined, isArray} from '../utils/type';
 import {toString} from '../utils/string';
 
 export default class PropList {
@@ -29,6 +29,7 @@ export default class PropList {
         delete this.$$string;
         delete this.$$events;
         delete this.$$nativeProps;
+        return this;
     }
     get events() {
         return this.$$events = this.$$events || this.toArray().filter(function(prop) {
@@ -41,9 +42,8 @@ export default class PropList {
         });
     }
     toString() {
-        return this.$$string = this.$$string || this.toArray()
-            .filter(prop => !prop.isEvent && (isString(prop.value) || isNumber(prop.value) || isBoolean(prop.value)))
-            .map(prop => `${prop.name}="${prop.value}"`)
+        return this.$$string = this.$$string || this.textProps
+            .map(prop => `${prop.name}="${toString(prop.value)}"`)
             .join(' ');
     }
     toMap() {

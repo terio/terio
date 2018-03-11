@@ -1,7 +1,7 @@
-import {isString, isFunction, getType, areDifferentTypes, isTextNode} from '../../utils/type';
+import {isString, getType} from '../../utils/type';
 import {toLowerCase} from '../../utils/string';
 import {create as createVirtualNode, default as VNode} from '../../vdom/node';
-import {isComponent, isComponentClass} from '../../components/base';
+import {isComponent} from '../../classes/component';
 import {TERIO_ROOT} from '../../constants/attr';
 
 function setTextProps($node, attrs) {
@@ -89,7 +89,7 @@ function doPostAttachTasks($node, node, idx = 0) {
     }
     node.children.forEach((childNode, idx) => doPostAttachTasks($node.childNodes[idx], childNode, idx));
 }
-function doPreDetachTasks($node, node, idx = 0) {
+function doPreDetachTasks($node, node) {
     if(isString(node)) {
         return;
     }
