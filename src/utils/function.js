@@ -1,5 +1,5 @@
-function defer(fn, args) {
-    setTimeout(fn.call(null, args));
+function defer(fn, ...args) {
+    setTimeout(fn.bind(null, ...args));
 }
 function noop() {}
 export {

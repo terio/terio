@@ -1,4 +1,5 @@
 import {isString, getType} from '../../utils/type';
+import {defer} from '../../utils/function';
 import {toLowerCase} from '../../utils/string';
 import {create as createVirtualNode, default as VNode} from '../../vdom/node';
 import {isComponent} from '../../classes/component';
@@ -81,10 +82,11 @@ function doPostAttachTasks($node, node, idx = 0) {
     }
     if(isComponent(node.component)) {
         const component = node.component;
-        component.onStateChange = function() {
+        component.onStateChange = function(done) {
             const renderedComponent = component.render().inflate(`${node.id}.0`);
             update($node, renderedComponent, node.children[0], idx);
             node.children = [renderedComponent];
+            defer(done);
         };
         component.mounted();
     }

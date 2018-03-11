@@ -6,7 +6,7 @@
   "author": "subramanyam963@gmail.com",
   "license": "MIT",
   "scripts": {
-    "install": "babel src --out-dir lib --source-maps inline",
+    "install": "babel src --out-dir lib",
     "lint": "eslint src"
   },
   "devDependencies": {

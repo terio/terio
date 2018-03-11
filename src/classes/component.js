@@ -1,5 +1,5 @@
 import {create as createVirtualNode} from '../vdom/node';
-import {defer} from '../utils/function';
+import {defer, noop} from '../utils/function';
 
 export default class Component {
     constructor(props, children) {
@@ -9,11 +9,11 @@ export default class Component {
     }
     mounted(){}
     willUnmount(){}
-    setState(state) {
+    setState(state, done) {
         this.state = Object.freeze(Object.assign({}, state));
+        done = done || noop;
         if(this.onStateChange) {
-            // this.onStateChange();
-            defer(this.onStateChange);
+            defer(this.onStateChange, done);
         }
     }
     render() {
