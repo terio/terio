@@ -1,6 +1,5 @@
 import {isString, isFunction, getType, areDifferentTypes, isTextNode} from '../../utils/type';
 import {toLowerCase} from '../../utils/string';
-import {getNativeProp} from '../shared/props';
 import {create as createVirtualNode, default as VNode} from '../../vdom/node';
 import {isComponent, isComponentClass} from '../../components/base';
 import {TERIO_ROOT} from '../../constants/attr';
@@ -152,7 +151,7 @@ function update($parent, newNode, oldNode, idx = 0) {
     if(diffSummary.isNodeObsolete) {
         return;
     }
-    
+
     if(!isString(newNode)) {
         const len = Math.max(oldNode.children.length, newNode.children.length);
         for(let i = 0; i < len; i++) {
