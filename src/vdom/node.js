@@ -3,6 +3,9 @@ import {toString} from '../utils/string';
 import PropList from './prop-list';
 import {isComponentClass} from '../classes/component';
 import {VOID_ELEMENTS} from '../constants/element';
+import {isPlaceHolder, default as placeholder} from './placeholder';
+
+const PLACEHOLDER_POSSIBLE_VALUES = new Set([null, undefined, false, '']);
 
 export default class VNode {
     constructor(type, props, ...children) {
@@ -11,6 +14,9 @@ export default class VNode {
         this.children = mergeAdjacentTextNodes(children.map(child => {
             if(isVNode(child)) {
                 return child;
+            }
+            if(isPlaceHolder(child) || PLACEHOLDER_POSSIBLE_VALUES.has(child)) {
+                return placeholder;
             }
             return toString(child);
         }));
@@ -26,7 +32,7 @@ export default class VNode {
         const newNode = this.clone();
         newNode.id = id;
         newNode.children = newNode.children.map(function(child, idx) {
-            if(isString(child)) {
+            if(isString(child) || isPlaceHolder(child)) {
                 return child;
             }
             return child.inflate(`${id}.${idx}`);
@@ -71,15 +77,20 @@ VNode.diff = function(firstNode, secondNode) {
         REMOVED_PROPS: new PropList(),
         UPDATED_PROPS: new PropList()
     };
-    if(!firstNode) {
+    if(isPlaceHolder(firstNode) && isPlaceHolder(secondNode)) {
         diff.FIRST_NODE_EXISTS = false;
-        return diff;
-    }
-    if(!secondNode) {
         diff.SECOND_NODE_EXISTS = false;
         return diff;
     }
-    if(areDifferentTypes(firstNode, secondNode)) {
+    if(!firstNode || isPlaceHolder(firstNode)) {
+        diff.FIRST_NODE_EXISTS = false;
+        return diff;
+    }
+    if(!secondNode|| isPlaceHolder(secondNode)) {
+        diff.SECOND_NODE_EXISTS = false;
+        return diff;
+    }
+    if(areDifferentTypes(firstNode, secondNode) || areDifferentTypes(firstNode.component, secondNode.component)) {
         diff.ARE_DIFFERENT_TYPES = true;
         return diff;
     }

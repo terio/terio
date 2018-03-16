@@ -33,6 +33,9 @@ function areDifferentTypes(a, b) {
 function isDefined(variable) {
     return getType(variable) !== TYPE.undefined;
 }
+function isUnDefined(variable) {
+    return getType(variable) === TYPE.undefined;
+}
 function isNull(variable) {
     return getType(variable) !== TYPE.null;
 }
@@ -57,5 +60,6 @@ export {
     isComponentNode,
     isNumber,
     isBoolean,
-    isTextNode
+    isTextNode,
+    isUnDefined
 };
