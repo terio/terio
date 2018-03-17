@@ -9,6 +9,9 @@ function reduceNodeToString(node) {
     if(isString(node)) {
         return node;
     }
+    if(isPlaceHolder(node)) {
+        return '';
+    }
     let str = '';
     let attrs = node.props.toString();
     if(node.isSelfClosing) {
@@ -16,12 +19,7 @@ function reduceNodeToString(node) {
     }
     str += `<${node.type}${attrs ? ` ${attrs}` : ''}>`;
     str = node.children
-        .reduce((pv, cv) => {
-            if(isPlaceHolder(cv)) {
-                return '';
-            }
-            return pv + reduceNodeToString(cv);
-        }, str);
+        .reduce((pv, cv) => pv + reduceNodeToString(cv), str);
     return str + `</${node.type}>`;
 }
 

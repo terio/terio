@@ -134,7 +134,7 @@ function hydrate($node, node) {
     }, {});
     node.props.textProps.forEach((prop) => {
         if(prop.name === TERIO_ROOT) {
-            setTextProps($node, new PropList([node.props.get(TERIO_ROOT)]));
+            setTextProps($node, [node.props.get(TERIO_ROOT)]);
             return;
         }
         if(!existingProps[prop.name] || existingProps[prop.name] !== prop.value) {
