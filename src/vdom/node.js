@@ -67,6 +67,15 @@ export default class VNode {
         return node;
     }
 }
+VNode.getNonEmptyNodesBeforeIdx= function(children, idx) {
+    const nonEmptyNodes = [];
+    for(let i = 0; i < idx; i++) {
+        if(!isPlaceHolder(children[i])) {
+            nonEmptyNodes.push(children[i]);
+        }
+    }
+    return nonEmptyNodes;
+};
 VNode.diff = function(firstNode, secondNode) {
     const diff = {
         FIRST_NODE_EXISTS: true,

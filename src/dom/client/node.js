@@ -35,17 +35,9 @@ function removeProps($node, props) {
     removeTextProps($node, props.textProps);
     removeEventListenerProps($node, props.events);
 }
-function getNumDOMNodesBeforeIndex(children, idx) {
-    let num = 0;
-    for(let i = 0; i < idx; i++) {
-        if(!isPlaceHolder(children[i])) {
-            num++;
-        }
-    }
-    return num;
-}
+
 function patch($parent, parent, newNode, oldNode, idx = 0) {
-    const $node = $parent.childNodes[getNumDOMNodesBeforeIndex(parent.children, idx)];
+    const $node = $parent.childNodes[VNode.getNonEmptyNodesBeforeIdx(parent.children, idx).length];
 
     const diff = VNode.diff(newNode, oldNode);
 
@@ -101,8 +93,7 @@ function doPostAttachTasks($node, node, idx = 0) {
         };
         component.mounted();
     }
-    node.children
-        .filter(child => !isPlaceHolder(child))
+    VNode.getNonEmptyNodesBeforeIdx(node.children, node.children.length)
         .forEach((childNode, idx) => doPostAttachTasks($node.childNodes[idx], childNode, idx));
 }
 function doPreDetachTasks($node, node) {
@@ -114,8 +105,7 @@ function doPreDetachTasks($node, node) {
         component.willUnmount();
         delete component.onStateChange;
     }
-    node.children
-        .filter(child => !isPlaceHolder(child))
+    VNode.getNonEmptyNodesBeforeIdx(node.children, node.children.length)
         .forEach((childNode, idx) => doPreDetachTasks($node.childNodes[idx], childNode, idx));
 }
 function hydrate($node, node) {
@@ -142,8 +132,7 @@ function hydrate($node, node) {
         }
     });
     setEventListenerProps($node, node.props.events);
-    node.children
-        .filter(child => !isPlaceHolder(child))
+    VNode.getNonEmptyNodesBeforeIdx(node.children, node.children.length)
         .forEach((child, idx) => {
             if(!$node.childNodes[idx]) {
                 throw 'Hydration went wrong or parent is not empty!';
@@ -158,15 +147,14 @@ function create(node) {
     }
     const $node = document.createElement(node.type);
     setProps($node, node.props);
-    node.children
-        .filter(child => !isPlaceHolder(child))
+    VNode.getNonEmptyNodesBeforeIdx(node.children, node.children.length)
         .map(child => create(child))
         .forEach($node.appendChild.bind($node));
     return $node;
 }
 
 function update($parent, parent, newNode, oldNode, idx = 0) {
-    const $node = $parent.childNodes[getNumDOMNodesBeforeIndex(parent.children, idx)];
+    const $node = $parent.childNodes[VNode.getNonEmptyNodesBeforeIdx(parent.children, idx).length];
 
     const patchSummary = patch($parent, parent, newNode, oldNode, idx);
     if(patchSummary.isNodeObsolete) {
