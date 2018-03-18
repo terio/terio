@@ -6,6 +6,7 @@ import {isComponent} from '../../classes/component';
 import {TERIO_ROOT} from '../../constants/attr';
 import PropList from '../../vdom/prop-list';
 import {isPlaceHolder} from '../../vdom/placeholder';
+import {isFragment} from '../../vdom/fragment';
 
 function setTextProps($node, attrs) {
     attrs.forEach((prop) => {
@@ -177,10 +178,11 @@ function unmount($node, node, idx) {
 }
 function mount($parent, node, shouldHydrate = false) {
     let $node = $parent.firstChild;
+    const flattenedNode = node.flatten();
     if(shouldHydrate) {
-        hydrate($node, node);
+        hydrate($node, flattenedNode);
     } else {
-        $node = $parent.appendChild(create(node));
+        $node = $parent.appendChild(create(flattenedNode));
     }
     doPostAttachTasks($node, node);
     return {

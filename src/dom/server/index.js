@@ -4,6 +4,7 @@ import {create as createVirtualNode} from '../../vdom/node';
 import {isString} from '../../utils/type';
 import Prop from '../../vdom/prop';
 import {isPlaceHolder} from '../../vdom/placeholder';
+import {isFragment} from '../../vdom/fragment';
 
 function reduceNodeToString(node) {
     if(isString(node)) {
@@ -11,6 +12,9 @@ function reduceNodeToString(node) {
     }
     if(isPlaceHolder(node)) {
         return '';
+    }
+    if(isFragment(node)) {
+        return node.reduce((pv, cv) => pv + reduceNodeToString(cv), '');;
     }
     let str = '';
     let attrs = node.props.toString();
@@ -24,9 +28,8 @@ function reduceNodeToString(node) {
 }
 
 function renderToString(node, dom, win) {
-    node = node.clone();
+    node = node.inflate().flatten();
     node.props.add(new Prop(TERIO_ROOT, ''));
-    node = node.inflate();
     return runInBrowserContext(reduceNodeToString, dom, win, node);
 }
 

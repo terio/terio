@@ -1,9 +1,11 @@
-import {isString, isDefined, isFunction, areDifferentTypes} from '../utils/type';
+import {isArray, isString, isDefined, isFunction, areDifferentTypes} from '../utils/type';
 import {toString} from '../utils/string';
 import PropList from './prop-list';
 import {isComponentClass} from '../classes/component';
 import {VOID_ELEMENTS} from '../constants/element';
 import {isPlaceHolder, default as placeholder} from './placeholder';
+import {isFragment, default as Fragment} from './fragment';
+import {isChildList, default as ChildList} from './child-list';
 
 const PLACEHOLDER_POSSIBLE_VALUES = new Set([null, undefined, false, '']);
 
@@ -11,15 +13,7 @@ export default class VNode {
     constructor(type, props, ...children) {
         this.type = type;
         this.props = new PropList(props);
-        this.children = mergeAdjacentTextNodes(children.map(child => {
-            if(isVNode(child)) {
-                return child;
-            }
-            if(isPlaceHolder(child) || PLACEHOLDER_POSSIBLE_VALUES.has(child)) {
-                return placeholder;
-            }
-            return toString(child);
-        }));
+        this.children = children;
         this.isSelfClosing = isFunction(this.type) || VOID_ELEMENTS.has(this.type);
     }
     inflate(id) {
@@ -30,18 +24,20 @@ export default class VNode {
             return vnode.inflate(id);
         }
         const newNode = this.clone();
-        newNode.id = id;
-        newNode.children = newNode.children.map(function(child, idx) {
-            if(isString(child) || isPlaceHolder(child)) {
-                return child;
-            }
-            return child.inflate(`${id}.${idx}`);
-        });
+        // newNode.id = id;
+        newNode.children = VNode.inflateArray(newNode.children, id);
         return newNode;
     }
     set component(component) {
         this.$$component = component;
         return component;
+    }
+    set children(children) {
+        this.$$children = ChildList.from(children);
+        return this.$$children;
+    }
+    get children() {
+        return this.$$children;
     }
     set id(id) {
         this.$$id = id;
@@ -66,12 +62,67 @@ export default class VNode {
         }
         return node;
     }
+    flatten() {
+        const clone = this.isInflated() ? this.clone(): this.inflate();
+        clone.children = VNode.flattenArray(clone.children);
+        return clone;
+    }
 }
-VNode.getNonEmptyNodesBeforeIdx= function(children, idx) {
+VNode.flattenArray = function(arr) {
+    const nodes = [];
+    arr.forEach((child) => {
+        if(isFragment(child)) {
+            nodes.push(...VNode.flattenArray(child));
+            return;
+        }
+        if(isVNode(child)) {
+            const inflatedChild = child.inflate();
+            inflatedChild.children = VNode.flattenArray(inflatedChild.children);
+            nodes.push(inflatedChild);
+            return;
+        }
+        nodes.push(child);
+    });
+    return nodes;
+};
+VNode.inflateArray = function(arr, parentId) {
+    const nodes = [];
+    for(let idx = 0; idx < arr.length; idx++) {
+        const childId = `${parentId}.${idx}`;
+        const child = arr[idx];
+        if(isVNode(child)) {
+            nodes.push(child.inflate(childId));
+            continue;
+        }
+        if(isPlaceHolder(child) || PLACEHOLDER_POSSIBLE_VALUES.has(child)) {
+            nodes.push(placeholder);
+            continue;
+        }
+        if(isChildList(child)) {
+            nodes.push(...VNode.inflateArray(child, parentId));
+            continue;
+        }
+        if(isFragment(child) || isArray(child)) {
+            nodes.push(Fragment.from(VNode.inflateArray(child, parentId)));
+            continue;
+        }
+        nodes.push(toString(child));
+    }
+    return VNode.mergeAdjacentTextNodes(nodes);
+};
+VNode.getNonEmptyNodesBeforeIdx = function(nodes, idx) {
     const nonEmptyNodes = [];
     for(let i = 0; i < idx; i++) {
-        if(!isPlaceHolder(children[i])) {
-            nonEmptyNodes.push(children[i]);
+        const node = nodes[i];
+        if(isFragment(node)) {
+            if(node.length === 0 || VNode.getNonEmptyNodesBeforeIdx(node, node.length).length === 0) {
+                continue;
+            }
+            nonEmptyNodes.push(node);
+            continue;
+        }
+        if(!isPlaceHolder(node)) {
+            nonEmptyNodes.push(node);
         }
     }
     return nonEmptyNodes;
@@ -135,10 +186,10 @@ VNode.diff = function(firstNode, secondNode) {
     }
     return diff;
 };
-function mergeAdjacentTextNodes(children) {
+VNode.mergeAdjacentTextNodes = function(arr) {
     let str = '';
     const mergedChildren = [];
-    children.forEach((child) => {
+    arr.forEach((child) => {
         if(!isString(child)) {
             if(str) {
                 mergedChildren.push(str);
@@ -153,7 +204,7 @@ function mergeAdjacentTextNodes(children) {
         mergedChildren.push(str);
     }
     return mergedChildren;
-}
+};
 function createVirtualNode(type, props, ...children) {
     return new VNode(type, props, ...children);
 }
