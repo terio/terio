@@ -18,9 +18,8 @@ export default function mount(node, $parent) {
         throw 'root should be component or a function!';
     }
     const treeId = `#${counter++}`;
-    node = node.clone();
-    node.props.add(new Prop(TERIO_ROOT, treeId));
     node = node.inflate(`${treeId}.0`);
+    node.props.add(new Prop(TERIO_ROOT, treeId));
     treeMap[treeId] = mountNode($parent, node, shouldHydrate);
     return treeMap[treeId];
 }
