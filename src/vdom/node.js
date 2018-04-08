@@ -1,4 +1,4 @@
-import {isString, isDefined, isFunction, areDifferentTypes} from '../utils/type';
+import {isString, isDefined, isFunction, areDifferentTypes, isArray} from '../utils/type';
 import {toString} from '../utils/string';
 import PropList from './prop-list';
 import {isComponentClass} from '../classes/component';
@@ -15,6 +15,9 @@ export default class VNode {
         this.children = mergeAdjacentTextNodes(children.map(child => {
             if(isVNode(child) || isFragment(child)) {
                 return child;
+            }
+            if(isArray(child)) {
+                return new Fragment(child);
             }
             if(isPlaceHolder(child) || PLACEHOLDER_POSSIBLE_VALUES.has(child)) {
                 return placeholder;
