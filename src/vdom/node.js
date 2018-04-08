@@ -4,6 +4,7 @@ import PropList from './prop-list';
 import {isComponentClass} from '../classes/component';
 import {VOID_ELEMENTS} from '../constants/element';
 import {isPlaceHolder, default as placeholder} from './placeholder';
+import {isFragment, isFragmentClass, default as Fragment} from './fragment';
 
 const PLACEHOLDER_POSSIBLE_VALUES = new Set([null, undefined, false, '']);
 
@@ -12,7 +13,7 @@ export default class VNode {
         this.type = type;
         this.props = new PropList(props);
         this.children = mergeAdjacentTextNodes(children.map(child => {
-            if(isVNode(child)) {
+            if(isVNode(child) || isFragment(child)) {
                 return child;
             }
             if(isPlaceHolder(child) || PLACEHOLDER_POSSIBLE_VALUES.has(child)) {
@@ -22,22 +23,19 @@ export default class VNode {
         }));
         this.isSelfClosing = isFunction(this.type) || VOID_ELEMENTS.has(this.type);
     }
-    inflate(id) {
+    inflate() {
+        const newNode = this.shallowInflate(true);
+        newNode.children = VNode.inflateArray(newNode.children);
+        return newNode;
+    }
+    shallowInflate(clone = false) {
         if(isComponentClass(this.type)) {
             const component = new this.type(this.props, this.children);
-            const vnode =  <div {...this.props}>{component.render()}</div>;
+            const vnode =  component._render();
             vnode.component = component;
-            return vnode.inflate(id);
+            return vnode;
         }
-        const newNode = this.clone();
-        newNode.id = id;
-        newNode.children = newNode.children.map(function(child, idx) {
-            if(isString(child) || isPlaceHolder(child)) {
-                return child;
-            }
-            return child.inflate(`${id}.${idx}`);
-        });
-        return newNode;
+        return clone ? this.clone() : this;
     }
     set component(component) {
         this.$$component = component;
@@ -61,75 +59,103 @@ export default class VNode {
     }
     clone() {
         const node = new VNode(this.type, this.props, ...this.children);
-        if(this.isInflated()) {
-            node.component = this.component;
-        }
         return node;
     }
 }
-VNode.getNonEmptyNodesBeforeIdx= function(children, idx) {
+//Fragments are left with their children inflated
+VNode.inflateArray = function(arr) {
+    const nodes = [];
+    for(let i = 0; i < arr.length; i++) {
+        const node = arr[i];
+        if(isString(node) || isPlaceHolder(node)) {
+            nodes.push(node);
+            continue;
+        }
+        if(isFragment(node)) {
+            nodes.push(new Fragment(VNode.inflateArray(node.children)));
+            continue;
+        }
+        nodes.push(node.inflate());
+    }
+    return nodes;
+};
+VNode.getNonEmptyNodesBeforeIdx = function(children, idx = -1) {
+    if(idx === -1) {
+        idx = children.length;
+    }
     const nonEmptyNodes = [];
     for(let i = 0; i < idx; i++) {
-        if(!isPlaceHolder(children[i])) {
-            nonEmptyNodes.push(children[i]);
+        const child = children[i];
+        if(isFragment(child) && child.children.length) {
+            nonEmptyNodes.push(...VNode.getNonEmptyNodesBeforeIdx(child.children));
+            continue;
+        }
+        if(!isPlaceHolder(child)) {
+            nonEmptyNodes.push(child);
+            continue;
         }
     }
     return nonEmptyNodes;
 };
-VNode.diff = function(firstNode, secondNode) {
+VNode.diff = function(newNode, oldNode) {
     const diff = {
-        FIRST_NODE_EXISTS: true,
-        SECOND_NODE_EXISTS: true,
-        ARE_DIFFERENT_TYPES: false,
-        ARE_DIFFERENT_TEXTS: false,
-        ADDED_PROPS: new PropList(),
-        REMOVED_PROPS: new PropList(),
-        UPDATED_PROPS: new PropList()
+        newNode: {
+            exists: true
+        },
+        oldNode: {
+            exists: true
+        },
+        areDifferentTypes: false,
+        areDifferentTexts: false,
+        props: {
+            added: new PropList(),
+            removed: new PropList(),
+            updated: new PropList()
+        }
     };
-    if(isPlaceHolder(firstNode) && isPlaceHolder(secondNode)) {
-        diff.FIRST_NODE_EXISTS = false;
-        diff.SECOND_NODE_EXISTS = false;
+    if(isPlaceHolder(newNode) && isPlaceHolder(oldNode)) {
+        diff.newNode.exists = false;
+        diff.oldNode.exists = false;
         return diff;
     }
-    if(!firstNode || isPlaceHolder(firstNode)) {
-        diff.FIRST_NODE_EXISTS = false;
+    if(!newNode || isPlaceHolder(newNode)) {
+        diff.newNode.exists = false;
         return diff;
     }
-    if(!secondNode|| isPlaceHolder(secondNode)) {
-        diff.SECOND_NODE_EXISTS = false;
+    if(!oldNode|| isPlaceHolder(oldNode)) {
+        diff.oldNode.exists = false;
         return diff;
     }
-    if(areDifferentTypes(firstNode, secondNode) || areDifferentTypes(firstNode.component, secondNode.component)) {
-        diff.ARE_DIFFERENT_TYPES = true;
+    if((newNode.type !== oldNode.type) || areDifferentTypes(newNode, oldNode) || areDifferentTypes(newNode.component, oldNode.component)) {
+        diff.areDifferentTypes = true;
         return diff;
     }
-    if(isString(firstNode)) {
-        if(firstNode !== secondNode) {
-            diff.ARE_DIFFERENT_TEXTS = true;
+    if(isString(newNode)) {
+        if(newNode !== oldNode) {
+            diff.areDifferentTexts = true;
         }
         return diff;
     }
-    if(firstNode.type !== secondNode.type) {
-        diff.ARE_DIFFERENT_TYPES = true;
+    if(isFragment(newNode)) {
         return diff;
     }
-    for(const prop of secondNode.props.toArray()) {
-        if(!firstNode.props.has(prop.name)) {
-            diff.REMOVED_PROPS.add(prop);
+    for(const prop of oldNode.props.toArray()) {
+        if(!newNode.props.has(prop.name)) {
+            diff.props.removed.add(prop);
             continue;
         }
-        if(prop.value !== firstNode.props.get(prop.name)) {
+        if(prop.value !== newNode.props.get(prop.name)) {
             if(prop.isEvent) {
-                diff.REMOVED_PROPS.add(prop);
-                diff.ADDED_PROPS.add(firstNode.props.get(prop.name));
+                diff.props.removed.add(prop);
+                diff.props.added.add(newNode.props.get(prop.name));
                 continue;
             }
-            diff.UPDATED_PROPS.add(firstNode.props.get(prop.name));
+            diff.props.updated.add(newNode.props.get(prop.name));
         }
     }
-    for(const prop of firstNode.props.toArray()) {
-        if(!secondNode.props.has(prop.name)) {
-            diff.ADDED_PROPS.add(prop);
+    for(const prop of newNode.props.toArray()) {
+        if(!oldNode.props.has(prop.name)) {
+            diff.props.added.add(prop);
             continue;
         }
     }
@@ -155,6 +181,9 @@ function mergeAdjacentTextNodes(children) {
     return mergedChildren;
 }
 function createVirtualNode(type, props, ...children) {
+    if(isFragmentClass(type)) {
+        return new Fragment(children);
+    }
     return new VNode(type, props, ...children);
 }
 function isVNode(node) {

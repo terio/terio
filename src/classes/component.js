@@ -13,11 +13,15 @@ export default class Component {
         this.state = Object.freeze(Object.assign({}, state));
         done = done || noop;
         if(this.onStateChange) {
-            defer(this.onStateChange, done);
+            // defer(this.onStateChange, done);
+            this.onStateChange(done);
         }
     }
     render() {
         return <div></div>;
+    }
+    _render() {
+        return <div {...this.props}>{this.render()}</div>;
     }
 }
 function isComponent(component) {
