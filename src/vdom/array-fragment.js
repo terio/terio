@@ -1,7 +1,7 @@
 import {isUnDefined} from '../utils/type';
 import {default as Prop} from './prop';
 
-export default class Fragment {
+export default class ArrayFragment {
     constructor(children) {
         this.children = children;
         this.children.forEach((node, idx) => {
@@ -14,13 +14,13 @@ export default class Fragment {
         });
     }
 };
-function isFragment(fragment) {
-    return fragment instanceof Fragment;
+function isArrayFragment(fragment) {
+    return fragment instanceof ArrayFragment;
 }
-function isFragmentClass(fn) {
-    return Fragment.isPrototypeOf(fn) || fn === Fragment;
+function isArrayFragmentClass(fn) {
+    return ArrayFragment.isPrototypeOf(fn) || fn === ArrayFragment;
 }
 export {
-    isFragment,
-    isFragmentClass
+    isArrayFragment,
+    isArrayFragmentClass
 };

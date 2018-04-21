@@ -7,7 +7,7 @@ import {isComponent, isComponentClass} from '../../classes/component';
 import {TERIO_ROOT} from '../../constants/attr';
 import PropList from '../../vdom/prop-list';
 import {isPlaceHolder} from '../../vdom/placeholder';
-import {isFragment} from '../../vdom/fragment';
+import {isArrayFragment} from '../../vdom/array-fragment';
 
 function setTextProps($node, attrs) {
     attrs.forEach((prop) => {
@@ -60,7 +60,7 @@ function patch($parent, parent, newNode, oldNode, idx = 0) {
         return patchSummary;
     }
     if(!diff.newNode.exists) {
-        if(isFragment(oldNode)) {
+        if(isArrayFragment(oldNode)) {
             const fragmentNonEmptyNodes = VNode.getNonEmptyNodesBeforeIdx(oldNode.children);
             const $start = nonEmptyNodesBeforeIdx.length;
             const $end = $start + fragmentNonEmptyNodes.length;
@@ -85,7 +85,7 @@ function patch($parent, parent, newNode, oldNode, idx = 0) {
 
         return patchSummary;
     }
-    if(isFragment(newNode)) {
+    if(isArrayFragment(newNode)) {
         const oldFragmentNonEmptyNodes = VNode.getNonEmptyNodesBeforeIdx(oldNode.children);
         const $start = nonEmptyNodesBeforeIdx.length;
         const $end = $start + oldFragmentNonEmptyNodes.length;
@@ -218,7 +218,7 @@ function create(node, cache = {}) {
         return create(node.inflate());
     }
     let $node, key;
-    if(isFragment(node)) {
+    if(isArrayFragment(node)) {
         $node = document.createDocumentFragment();
         $node._childNodes = [];
     } else {
@@ -250,7 +250,7 @@ function update($parent, parent, newNode, oldNode, idx = 0) {
     if(patchSummary.isNodeObsolete) {
         return;
     }
-    if(isFragment(newNode) || isFragment(oldNode)) {
+    if(isArrayFragment(newNode) || isArrayFragment(oldNode)) {
         return;
     }
     const $node = $parent.childNodes[VNode.getNonEmptyNodesBeforeIdx(parent.children, idx).length];

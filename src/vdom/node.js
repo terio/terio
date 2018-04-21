@@ -4,7 +4,7 @@ import PropList from './prop-list';
 import {isComponentClass} from '../classes/component';
 import {VOID_ELEMENTS} from '../constants/element';
 import {isPlaceHolder, default as placeholder} from './placeholder';
-import {isFragment, isFragmentClass, default as Fragment} from './fragment';
+import {isArrayFragment, isArrayFragmentClass, default as ArrayFragment} from './array-fragment';
 
 const PLACEHOLDER_POSSIBLE_VALUES = new Set([null, undefined, false, '']);
 
@@ -13,11 +13,11 @@ export default class VNode {
         this.type = type;
         this.props = new PropList(props);
         this.children = mergeAdjacentTextNodes(children.map(child => {
-            if(isVNode(child) || isFragment(child)) {
+            if(isVNode(child) || isArrayFragment(child)) {
                 return child;
             }
             if(isArray(child)) {
-                return new Fragment(child);
+                return new ArrayFragment(child);
             }
             if(isPlaceHolder(child) || PLACEHOLDER_POSSIBLE_VALUES.has(child)) {
                 return placeholder;
@@ -74,8 +74,8 @@ VNode.inflateArray = function(arr) {
             nodes.push(node);
             continue;
         }
-        if(isFragment(node)) {
-            nodes.push(new Fragment(VNode.inflateArray(node.children)));
+        if(isArrayFragment(node)) {
+            nodes.push(new ArrayFragment(VNode.inflateArray(node.children)));
             continue;
         }
         nodes.push(node.inflate());
@@ -89,7 +89,7 @@ VNode.getNonEmptyNodesBeforeIdx = function(children, idx = -1) {
     const nonEmptyNodes = [];
     for(let i = 0; i < idx; i++) {
         const child = children[i];
-        if(isFragment(child) && child.children.length) {
+        if(isArrayFragment(child) && child.children.length) {
             nonEmptyNodes.push(...VNode.getNonEmptyNodesBeforeIdx(child.children));
             continue;
         }
@@ -104,11 +104,11 @@ VNode.diff = function(newNode, oldNode) {
     const diff = {
         newNode: {
             exists: true,
-            isFragment: isFragment(newNode)
+            isArrayFragment: isArrayFragment(newNode)
         },
         oldNode: {
             exists: true,
-            isFragment: isFragment(oldNode)
+            isArrayFragment: isArrayFragment(oldNode)
         },
         areDifferentTypes: false,
         areDifferentTexts: false,
@@ -146,7 +146,7 @@ VNode.diff = function(newNode, oldNode) {
         }
         return diff;
     }
-    if(isFragment(newNode)) {
+    if(isArrayFragment(newNode)) {
         const existingKeys = {};
         oldNode.children.forEach((childNode, idx) => {
             if(VNode.isNodeEmpty(childNode) || isString(childNode) || isPlaceHolder(childNode)) {
@@ -202,7 +202,7 @@ VNode.isNodeEmpty = function(node) {
     if(isVNode(node) || isString(node)) {
         return false;
     }
-    if(isFragment(node)) {
+    if(isArrayFragment(node)) {
         if(node.children.length === 0) {
             return true;
         }
@@ -230,8 +230,8 @@ function mergeAdjacentTextNodes(children) {
     return mergedChildren;
 }
 function createVirtualNode(type, props, ...children) {
-    if(isFragmentClass(type)) {
-        return new Fragment(children);
+    if(isArrayFragmentClass(type)) {
+        return new ArrayFragment(children);
     }
     return new VNode(type, props, ...children);
 }

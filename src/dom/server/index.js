@@ -4,7 +4,7 @@ import {create as createVirtualNode} from '../../vdom/node';
 import {isString} from '../../utils/type';
 import Prop from '../../vdom/prop';
 import {isPlaceHolder} from '../../vdom/placeholder';
-import {isFragment} from '../../vdom/fragment';
+import {isArrayFragment} from '../../vdom/array-fragment';
 
 function reduceNodeToString(node) {
     if(isString(node)) {
@@ -13,7 +13,7 @@ function reduceNodeToString(node) {
     if(isPlaceHolder(node)) {
         return '';
     }
-    if(isFragment(node)) {
+    if(isArrayFragment(node)) {
         return node.children
             .reduce((pv, cv) => pv + reduceNodeToString(cv), '');
     }
