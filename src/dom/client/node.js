@@ -1,8 +1,8 @@
-import {isString, getType, isFunction} from '../../utils/type';
+import {isString, getType, isFunction, isDefined, isUnDefined} from '../../utils/type';
 import {defer} from '../../utils/function';
 import {slice} from '../../utils/array';
 import {toLowerCase} from '../../utils/string';
-import {create as createVirtualNode, default as VNode} from '../../vdom/node';
+import {create as createVirtualNode, default as VNode, isVNode} from '../../vdom/node';
 import {isComponent, isComponentClass} from '../../classes/component';
 import {TERIO_ROOT} from '../../constants/attr';
 import PropList from '../../vdom/prop-list';
@@ -82,6 +82,37 @@ function patch($parent, parent, newNode, oldNode, idx = 0) {
         $parent.replaceChild($newNode, $node);
 
         doPostAttachTasks($newNode, newNode);
+
+        return patchSummary;
+    }
+    if(isFragment(newNode)) {
+        const oldFragmentNonEmptyNodes = VNode.getNonEmptyNodesBeforeIdx(oldNode.children);
+        const $start = nonEmptyNodesBeforeIdx.length;
+        const $end = $start + oldFragmentNonEmptyNodes.length;
+        const $fragmentNodes = slice($parent.childNodes, $start, $end);
+        const $nextSibling = $fragmentNodes.length ? $fragmentNodes[$fragmentNodes.length - 1].nextSibling : null;
+
+        const newFragmentNonEmptyNodes = VNode.getNonEmptyNodesBeforeIdx(newNode.children);
+
+        const keyNodeMap = Object.keys(diff.fragment.existing).reduce((acc, key) => {
+            acc[key] = $fragmentNodes[diff.fragment.existing[key]];
+            return acc;
+        }, {});
+        for(const oldIdx of Object.values(diff.fragment.removed)) {
+            unmount($fragmentNodes[oldIdx], oldFragmentNonEmptyNodes[oldIdx]);
+        }
+        const $newNode = create(newNode, keyNodeMap);
+        $parent.insertBefore($newNode, $nextSibling);
+
+        newFragmentNonEmptyNodes.forEach((node, idx) => {
+            const key = node.props ? node.props.get('key'): undefined;
+            if(isUnDefined(key)) {
+                return;
+            }
+            if(isDefined(diff.fragment.added[key])) {
+                doPostAttachTasks($newNode._childNodes[idx], node);
+            }
+        });
 
         return patchSummary;
     }
@@ -179,14 +210,14 @@ function hydrate($node, node) {
         });
     return $node;
 }
-function create(node) {
+function create(node, cache = {}) {
     if(isString(node)) {
         return document.createTextNode(node);
     }
     if(isFunction(node.type)) {
         return create(node.inflate());
     }
-    let $node;
+    let $node, key;
     if(isFragment(node)) {
         $node = document.createDocumentFragment();
         $node._childNodes = [];
@@ -195,7 +226,15 @@ function create(node) {
         setProps($node, node.props);
     }
     VNode.getNonEmptyNodesBeforeIdx(node.children)
-        .map(child => create(child))
+        .map(child => {
+            if(isVNode(child)) {
+                const key = child.props.get('key');
+                if(isDefined(cache[key])) {
+                    return cache[key];
+                }
+            }
+            return create(child);
+        })
         .forEach(function(child) {
             $node.appendChild(child);
             if($node._childNodes) {

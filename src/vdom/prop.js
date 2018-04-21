@@ -27,6 +27,9 @@ export default class Prop {
         }
         Object.assign(this, prop);
     }
+    toString() {
+        return toString(this.value);
+    }
 }
 function isProp(prop) {
     return prop instanceof Prop;

@@ -1,4 +1,4 @@
-import {isString, isDefined, isFunction, areDifferentTypes, isArray} from '../utils/type';
+import {isUnDefined, isString, isDefined, isFunction, areDifferentTypes, isArray} from '../utils/type';
 import {toString} from '../utils/string';
 import PropList from './prop-list';
 import {isComponentClass} from '../classes/component';
@@ -103,10 +103,12 @@ VNode.getNonEmptyNodesBeforeIdx = function(children, idx = -1) {
 VNode.diff = function(newNode, oldNode) {
     const diff = {
         newNode: {
-            exists: true
+            exists: true,
+            isFragment: isFragment(newNode)
         },
         oldNode: {
-            exists: true
+            exists: true,
+            isFragment: isFragment(oldNode)
         },
         areDifferentTypes: false,
         areDifferentTexts: false,
@@ -114,6 +116,11 @@ VNode.diff = function(newNode, oldNode) {
             added: new PropList(),
             removed: new PropList(),
             updated: new PropList()
+        },
+        fragment: {
+            added: {},
+            removed: {},
+            existing: {}
         }
     };
     if(isPlaceHolder(newNode) && isPlaceHolder(oldNode)) {
@@ -140,6 +147,33 @@ VNode.diff = function(newNode, oldNode) {
         return diff;
     }
     if(isFragment(newNode)) {
+        const existingKeys = {};
+        oldNode.children.forEach((childNode, idx) => {
+            if(VNode.isNodeEmpty(childNode) || isString(childNode) || isPlaceHolder(childNode)) {
+                return;
+            }
+            existingKeys[childNode.props.get('key')] = idx;
+        });
+        const newKeys = {};
+        newNode.children.forEach((childNode, idx) => {
+            if(VNode.isNodeEmpty(childNode) || isString(childNode) || isPlaceHolder(childNode)) {
+                return;
+            }
+            newKeys[childNode.props.get('key')] = idx;
+        });
+        for(const [key, newIdx] of Object.entries(newKeys)) {
+            if(isUnDefined(existingKeys[key])) {
+                diff.fragment.added[key] = newIdx;
+                continue;
+            }
+        }
+        for(const [key, oldIdx] of Object.entries(existingKeys)) {
+            if(isDefined(newKeys[key])) {
+                diff.fragment.existing[key] = oldIdx;
+                continue;
+            }
+            diff.fragment.removed[key] = oldIdx;
+        }
         return diff;
     }
     for(const prop of oldNode.props.toArray()) {
@@ -163,6 +197,18 @@ VNode.diff = function(newNode, oldNode) {
         }
     }
     return diff;
+};
+VNode.isNodeEmpty = function(node) {
+    if(isVNode(node) || isString(node)) {
+        return false;
+    }
+    if(isFragment(node)) {
+        if(node.children.length === 0) {
+            return true;
+        }
+        return node.children.some(child => !VNode.isNodeEmpty(child));
+    }
+    return true;
 };
 function mergeAdjacentTextNodes(children) {
     let str = '';

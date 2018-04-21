@@ -1,10 +1,11 @@
 import {create as createVirtualNode} from '../vdom/node';
+import Children from '../vdom/children';
 import {defer, noop} from '../utils/function';
 
 export default class Component {
     constructor(props, children) {
         this.props = props;
-        this.children = children;
+        this.children = Children.from(children);
         this.state = Object.freeze({});
     }
     mounted(){}
