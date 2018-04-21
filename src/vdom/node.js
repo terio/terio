@@ -89,7 +89,10 @@ VNode.getNonEmptyNodesBeforeIdx = function(children, idx = -1) {
     const nonEmptyNodes = [];
     for(let i = 0; i < idx; i++) {
         const child = children[i];
-        if(isArrayFragment(child) && child.children.length) {
+        if(isArrayFragment(child)) {
+            if(!child.children.length) {
+                continue;
+            }
             nonEmptyNodes.push(...VNode.getNonEmptyNodesBeforeIdx(child.children));
             continue;
         }
