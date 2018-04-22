@@ -14,8 +14,7 @@ export default class Component {
         this.state = Object.freeze(Object.assign({}, state));
         done = done || noop;
         if(this.onStateChange) {
-            // defer(this.onStateChange, done);
-            this.onStateChange(done);
+            defer(this.onStateChange, done);
         }
     }
     render() {

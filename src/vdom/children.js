@@ -1,1 +1,1 @@
-export default class Children extends Array {};
+export default class Children extends Array {}

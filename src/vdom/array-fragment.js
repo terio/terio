@@ -13,7 +13,7 @@ export default class ArrayFragment {
             }
         });
     }
-};
+}
 function isArrayFragment(fragment) {
     return fragment instanceof ArrayFragment;
 }

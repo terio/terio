@@ -3,10 +3,8 @@ import {defer} from '../../utils/function';
 import {slice} from '../../utils/array';
 import {toLowerCase} from '../../utils/string';
 import {create as createVirtualNode, default as VNode, isVNode} from '../../vdom/node';
-import {isComponent, isComponentClass} from '../../classes/component';
+import {isComponent} from '../../classes/component';
 import {TERIO_ROOT} from '../../constants/attr';
-import PropList from '../../vdom/prop-list';
-import {isPlaceHolder} from '../../vdom/placeholder';
 import {isArrayFragment} from '../../vdom/array-fragment';
 
 function setTextProps($node, attrs) {
@@ -151,7 +149,7 @@ function doPostAttachTasks($node, node) {
         } else {
             $childNode = $node.childNodes[idx];
         }
-        doPostAttachTasks($childNode, childNode)
+        doPostAttachTasks($childNode, childNode);
     });
 }
 function doPreDetachTasks($node, node) {
@@ -217,7 +215,7 @@ function create(node, cache = {}) {
     if(isFunction(node.type)) {
         return create(node.inflate());
     }
-    let $node, key;
+    let $node;
     if(isArrayFragment(node)) {
         $node = document.createDocumentFragment();
         $node._childNodes = [];
