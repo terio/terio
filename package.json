@@ -6,16 +6,16 @@
   "author": "subramanyam963@gmail.com",
   "license": "MIT",
   "scripts": {
-    "install": "babel src --out-dir lib",
+    "postinstall": "babel src --out-dir lib",
     "lint": "eslint src"
   },
   "devDependencies": {
     "@babel/cli": "^7.0.0-beta.39",
     "@babel/core": "^7.0.0-beta.39",
     "@babel/preset-env": "^7.0.0-beta.39",
-    "babel-preset-terio": "file:../babel-preset-terio",
+    "babel-preset-terio": "https://github.com/terio/babel-preset-terio",
     "eslint": "^4.17.0",
-    "eslint-config-terio": "file:../eslint-config-terio"
+    "eslint-config-terio": "https://github.com/terio/eslint-config-terio"
   },
   "dependencies": {},
   "peerDependencies": {
