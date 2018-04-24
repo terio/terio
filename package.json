@@ -10,9 +10,9 @@
     "lint": "eslint src"
   },
   "devDependencies": {
-    "@babel/cli": "^7.0.0-beta.39",
-    "@babel/core": "^7.0.0-beta.39",
-    "@babel/preset-env": "^7.0.0-beta.39",
+    "@babel/cli": "7.0.0-beta.46",
+    "@babel/core": "7.0.0-beta.46",
+    "@babel/preset-env": "7.0.0-beta.46",
     "babel-preset-terio": "https://github.com/terio/babel-preset-terio",
     "eslint": "^4.17.0",
     "eslint-config-terio": "https://github.com/terio/eslint-config-terio"
