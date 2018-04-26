@@ -132,6 +132,14 @@ function doPostAttachTasks($node, node) {
     if(isString(node)) {
         return;
     }
+    if(isVNode(node)) {
+        if(node.props.has('ref')) {
+            const ref = node.props.get('ref');
+            if(isFunction(ref.value)) {
+                ref.value($node);
+            }
+        }
+    }
     if(isComponent(node.component)) {
         const component = node.component;
         component.onStateChange = function(done) {
