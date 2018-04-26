@@ -88,7 +88,7 @@ function patch($parent, parent, newNode, oldNode, idx = 0) {
         const $start = nonEmptyNodesBeforeIdx.length;
         const $end = $start + oldFragmentNonEmptyNodes.length;
         const $fragmentNodes = slice($parent.childNodes, $start, $end);
-        const $nextSibling = $fragmentNodes.length ? $fragmentNodes[$fragmentNodes.length - 1].nextSibling : null;
+        const $nextSibling = $parent.childNodes[$end] || null;
 
         const newFragmentNonEmptyNodes = VNode.getNonEmptyNodesBeforeIdx(newNode.children);
 
