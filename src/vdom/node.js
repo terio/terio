@@ -12,18 +12,7 @@ export default class VNode {
     constructor(type, props, ...children) {
         this.type = type;
         this.props = new PropList(props);
-        this.children = mergeAdjacentTextNodes(children.map(child => {
-            if(isVNode(child) || isArrayFragment(child)) {
-                return child;
-            }
-            if(isArray(child)) {
-                return new ArrayFragment(child);
-            }
-            if(isPlaceHolder(child) || PLACEHOLDER_POSSIBLE_VALUES.has(child)) {
-                return placeholder;
-            }
-            return toString(child);
-        }));
+        this.children = mergeAdjacentTextNodes(children.map(VNode.toVNode));
         this.isSelfClosing = isFunction(this.type) || VOID_ELEMENTS.has(this.type);
     }
     inflate() {
@@ -212,6 +201,18 @@ VNode.isNodeEmpty = function(node) {
         return node.children.some(child => !VNode.isNodeEmpty(child));
     }
     return true;
+};
+VNode.toVNode = function(node) {
+    if(isVNode(node) || isArrayFragment(node)) {
+        return node;
+    }
+    if(isArray(node)) {
+        return new ArrayFragment(node);
+    }
+    if(isPlaceHolder(node) || PLACEHOLDER_POSSIBLE_VALUES.has(node)) {
+        return placeholder;
+    }
+    return toString(node);
 };
 function mergeAdjacentTextNodes(children) {
     let str = '';

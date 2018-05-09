@@ -1,6 +1,7 @@
 import {create as createVirtualNode} from '../vdom/node';
 import Children from '../vdom/children';
 import {defer, noop} from '../utils/function';
+import VNode from '../vdom/node';
 
 export default class Component {
     constructor(props, children) {
@@ -18,10 +19,10 @@ export default class Component {
         }
     }
     render() {
-        return <div></div>;
+        return null;
     }
     _render() {
-        return <div {...this.props}>{this.render()}</div>;
+        return VNode.toVNode(this.render());
     }
 }
 function isComponent(component) {
